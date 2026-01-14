@@ -5,119 +5,31 @@
 <title>MARPED – Antibiyotik Doz</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-}
-header{
-  background:#198754;
-  color:white;
-  padding:15px;
-  text-align:center;
-}
-.container{
-  padding:20px;
-  max-width:420px;
-  margin:auto;
-}
-.card{
-  background:white;
-  border-radius:12px;
-  padding:20px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-select, input, button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  font-size:16px;
-}
-button{
-  background:#198754;
-  color:white;
-  border:none;
-  border-radius:8px;
-}
-.result{
-  margin-top:15px;
-  font-size:15px;
-}
-.back{
-  text-align:center;
-  margin-top:15px;
-}
-.back a{
-  text-decoration:none;
-  color:#198754;
-}
+body{font-family:Arial;background:#f4f6f8;margin:0}
+header{background:#198754;color:#fff;padding:15px;text-align:center}
+.container{padding:20px;max-width:420px;margin:auto}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+select,input,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
+button{background:#198754;color:#fff;border:none;border-radius:8px}
+.result{margin-top:15px;font-size:15px}
+.back{text-align:center;margin-top:15px}
+.back a{text-decoration:none;color:#198754}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h2>Antibiyotik Doz Hesaplama</h2>
-  <p>Pediyatrik doz – mg/kg</p>
+<h2>Antibiyotik Doz Hesaplama</h2>
+<p>Pediatrik mg/kg doz</p>
 </header>
 
 <div class="container">
-  <div class="card">
+<div class="card">
 
-    <label>Antibiyotik seç</label>
-    <select id="ab">
-      <option value="">Seçiniz</option>
-      <option value="amoks">Amoksisilin</option>
-      <option value="amp">Ampisilin</option>
-    </select>
-
-    <label>Kilo (kg)</label>
-    <input type="number" id="kg" placeholder="Örn: 15">
-
-    <button onclick="hesapla()">Hesapla</button>
-
-    <div class="result" id="sonuc"></div>
-
-  </div>
-
-  <div class="back">
-    <a href="index.html">← Ana Sayfa</a>
-  </div>
-</div>
-
-<script>
-function hesapla(){
-  let ab = document.getElementById("ab").value;
-  let kg = document.getElementById("kg").value;
-  let sonuc = "";
-
-  if (!ab || kg <= 0){
-    document.getElementById("sonuc").innerHTML = "Lütfen tüm alanları doldurun.";
-    return;
-  }
-
-  if (ab === "amoks"){
-    let gunluk = kg * 50; // mg/kg/gün
-    let doz = (gunluk / 3).toFixed(0);
-    sonuc =
-      "<b>Amoksisilin</b><br>" +
-      "Günlük doz: " + gunluk + " mg<br>" +
-      "Doz başına (3x1): " + doz + " mg";
-  }
-
-  if (ab === "amp"){
-    let gunluk = kg * 100; // mg/kg/gün
-    let doz = (gunluk / 4).toFixed(0);
-    sonuc =
-      "<b>Ampisilin</b><br>" +
-      "Günlük doz: " + gunluk + " mg<br>" +
-      "Doz başına (4x1): " + doz + " mg";
-  }
-
-  document.getElementById("sonuc").innerHTML = sonuc +
-    "<br><br><small>⚠️ Klinik karar hekimindir.</small>";
-}
-</script>
-
-</body>
-</html>
+<label>Antibiyotik</label>
+<select id="ab">
+<option value="">Seçiniz</option>
+<option value="amoks">Amoksisilin</option>
+<option value="amp">Ampisilin</option>
+<option value="cefotax">Sefotaksim<
