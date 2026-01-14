@@ -2,12 +2,12 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>MARPED – GIR & Dekstroz</title>
+<title>MARPED – GIR Glukoz Hesabı</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{font-family:Arial;background:#f4f6f8;margin:0}
 header{background:#6f42c1;color:white;padding:15px;text-align:center}
-.container{padding:20px;max-width:520px;margin:auto}
+.container{padding:20px;max-width:540px;margin:auto}
 .card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
 input,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
 button{background:#6f42c1;color:white;border:none;border-radius:8px}
@@ -21,7 +21,7 @@ small{color:#666}
 <body>
 
 <header>
-<h2>GIR → Dekstroz Uygunluk Hesabı</h2>
+<h2>GIR → Glukoz Karışımı</h2>
 <p>D5 – D10 – D20 – D30</p>
 </header>
 
@@ -29,13 +29,13 @@ small{color:#666}
 <div class="card">
 
 <label>Kilo (kg)</label>
-<input type="number" id="kg" placeholder="Örn: 10">
+<input type="number" id="kg" placeholder="10">
 
 <label>Hedef GIR (mg/kg/dk)</label>
-<input type="number" id="gir" placeholder="Örn: 6">
+<input type="number" id="gir" placeholder="6">
 
 <label>Toplam sıvı (ml/gün)</label>
-<input type="number" id="vol" placeholder="Örn: 200">
+<input type="number" id="vol" placeholder="200">
 
 <button onclick="hesapla()">Hesapla</button>
 
@@ -45,51 +45,47 @@ small{color:#666}
 </div>
 
 <script>
-<script>
-function satir(dex, vol, gerekli){
+function satir(dex, vol, glukoz){
   let g_per_ml = dex / 100;
   let max_g = vol * g_per_ml;
 
-  if(max_g < gerekli){
+  if(max_g < glukoz){
     return `<div class="bad">❌ D${dex}: yetersiz (maks ${max_g.toFixed(1)} g)</div>`;
   }
 
-  // Gerekli DEX hacmi
-  let ml_dex = gerekli / g_per_ml;
-
-  // Kalan hacim D5 ile tamamlanır
+  let ml_dex = glukoz / g_per_ml;
   let ml_d5 = vol - ml_dex;
 
+  if(ml_d5 < 0) return "";
+
   return `<div class="ok">
-  ✅ D${dex}: ${ml_dex.toFixed(0)} ml D${dex} + ${ml_d5.toFixed(0)} ml D5
+  ✅ ${ml_dex.toFixed(0)} ml D${dex} + ${ml_d5.toFixed(0)} ml D5
   </div>`;
 }
-</script>
-
 
 function hesapla(){
-let kg=+document.getElementById("kg").value;
-let gir=+document.getElementById("gir").value;
-let vol=+document.getElementById("vol").value;
+  let kg = +document.getElementById("kg").value;
+  let gir = +document.getElementById("gir").value;
+  let vol = +document.getElementById("vol").value;
 
-if(kg<=0||gir<=0||vol<=0){
-sonuc.innerHTML="Lütfen tüm alanları doldurun.";
-return;
-}
+  if(kg<=0 || gir<=0 || vol<=0){
+    sonuc.innerHTML="Lütfen tüm alanları doldurun.";
+    return;
+  }
 
-let glukoz = gir * kg * 1440 / 1000;
+  let glukoz = gir * kg * 1440 / 1000;
 
-sonuc.innerHTML =
-`<b>Günlük gerekli glukoz:</b> ${glukoz.toFixed(1)} g<br><br>
-${satir(5,vol,glukoz)}
-${satir(10,vol,glukoz)}
-${satir(20,vol,glukoz)}
-${satir(30,vol,glukoz)}
-<br>
-<small>
-⚠️ Uygun seçenek yoksa hacmi artırın veya GIR’i düşürün.<br>
-Nihai sorumluluk klinisyene aittir.
-</small>`;
+  sonuc.innerHTML = `
+  <b>Günlük gerekli glukoz:</b> ${glukoz.toFixed(1)} g<br><br>
+  ${satir(30,vol,glukoz)}
+  ${satir(20,vol,glukoz)}
+  ${satir(10,vol,glukoz)}
+  ${satir(5,vol,glukoz)}
+  <br>
+  <small>
+  ⚠️ Toplam hacim yalnızca glukozlu sıvılarla doldurulur.<br>
+  Nihai sorumluluk klinisyene aittir.
+  </small>`;
 }
 </script>
 
