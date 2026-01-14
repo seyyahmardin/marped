@@ -2,47 +2,73 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>MARPED - Sıvı Hesaplama</title>
+<title>MARPED</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { font-family: Arial; padding: 20px; background:#f5f5f5; }
-.card { background:white; padding:20px; border-radius:10px; max-width:400px; margin:auto; }
-button { width:100%; padding:10px; font-size:16px; }
-input { width:100%; padding:8px; margin:8px 0; }
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+}
+header{
+  background:#0b5ed7;
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+.container{
+  padding:20px;
+}
+.card{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:15px;
+  text-align:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+.card a{
+  text-decoration:none;
+  color:#0b5ed7;
+  font-size:18px;
+  font-weight:bold;
+  display:block;
+}
+footer{
+  text-align:center;
+  font-size:12px;
+  color:#666;
+  padding:15px;
+}
 </style>
 </head>
+
 <body>
 
-<div class="card">
-<h2>MARPED – Günlük Sıvı Hesaplama</h2>
+<header>
+  <h1>MARPED</h1>
+  <p>Mardin Pediatrik Klinik Hesaplama Platformu</p>
+</header>
 
-<label>Kilo (kg):</label>
-<input type="number" id="kg">
+<div class="container">
 
-<button onclick="hesapla()">Hesapla</button>
+  <div class="card">
+    <a href="sivi.html">🧮 Sıvı Hesaplama</a>
+  </div>
 
-<p id="sonuc"></p>
+  <div class="card">
+    <a href="antibiyotik.html">💊 Antibiyotik Doz Hesaplama</a>
+  </div>
 
-<hr>
-<small>
-⚠️ Klinik karar destek aracıdır. Nihai sorumluluk hekimindir.
-</small>
+  <div class="card">
+    <a href="tpn.html">🧪 TPN Hesaplama</a>
+  </div>
+
 </div>
 
-<script>
-function hesapla(){
-  let kg = document.getElementById("kg").value;
-  let sivi = 0;
-
-  if (kg <= 10) sivi = kg * 100;
-  else if (kg <= 20) sivi = 1000 + (kg - 10) * 50;
-  else sivi = 1500 + (kg - 20) * 20;
-
-  document.getElementById("sonuc").innerHTML =
-   "Günlük sıvı ihtiyacı: <b>" + sivi + " ml</b><br>" +
-   "Saatlik: <b>" + (sivi/24).toFixed(1) + " ml/saat</b>";
-}
-</script>
+<footer>
+⚠️ Bu site klinik karar destek aracıdır. Nihai sorumluluk hekimindir.
+</footer>
 
 </body>
 </html>
