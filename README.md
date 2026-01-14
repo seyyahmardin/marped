@@ -3,9 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <title>MARPED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+}
+header{
+  background:#0b5ed7;
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+.container{
+  padding:20px;
+}
+.card{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:15px;
+  text-align:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+.card a{
+  text-decoration:none;
+  color:#0b5ed7;
+  font-size:18px;
+  font-weight:bold;
+  display:block;
+}
+footer{
+  text-align:center;
+  font-size:12px;
+  color:#666;
+  padding:15px;
+}
+</style>
 </head>
+
 <body>
-<h1>MARPED çalışıyor 🎉</h1>
-<p>GitHub Pages aktif.</p>
+
+<header>
+  <h1>MARPED</h1>
+  <p>Mardin Pediatrik Klinik Hesaplama Platformu</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <a href="sivi.html">🧮 Sıvı Hesaplama</a>
+  </div>
+
+  <div class="card">
+    <a href="antibiyotik.html">💊 Antibiyotik Doz Hesaplama</a>
+  </div>
+
+  <div class="card">
+    <a href="tpn.html">🧪 TPN Hesaplama</a>
+  </div>
+
+</div>
+
+<footer>
+⚠️ Bu site klinik karar destek aracıdır. Nihai sorumluluk hekimindir.
+</footer>
+
 </body>
 </html>
