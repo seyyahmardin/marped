@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>MARPED – Fizik Muayene Şablonu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+header{background:#0b5ed7;color:white;padding:15px;text-align:center}
+.container{padding:20px;max-width:700px;margin:auto}
+.card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+textarea{width:100%;height:400px;padding:10px;font-size:14px}
+button{margin-top:10px;padding:10px;font-size:16px;width:100%;
+background:#0b5ed7;color:white;border:none;border-radius:8px}
+.back{text-align:center;margin-top:15px}
+.back a{text-decoration:none;color:#0b5ed7}
+small{color:#666}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>Fizik Muayene Şablonu</h2>
+<p>Pediatrik Standart Not</p>
+</header>
+
+<div class="container">
+<div class="card">
+
+<textarea id="note">
+GENEL DURUM:
+Bilinç açık, koopere, oryante. Genel durumu iyi / orta / kötü.
+
+VİTAL BULGULAR:
+Ateş: ___ °C
+Nabız: ___ /dk
+Solunum: ___ /dk
+TA: ___ / ___ mmHg
+SpO₂: ___ %
+
+BAŞ-BOYUN:
+Baş normosefalik. Fontanel açık/kapalı. Boyun serbest, LAP yok.
+
+GÖZ:
+Konjonktivalar doğal. Sklera ikterik değil.
+
+KBB:
+Kulak yolu ve TMi doğal. Orofarenks hiperemik değil.
+
+SOLUNUM SİSTEMİ:
+Solunum sayısı yaşa uygun. Retraksiyon yok.
+Her iki hemitoraks solunuma eşit katılıyor.
+Raller/ronküs yok.
+
+KARDİYOVASKÜLER:
+Kalp sesleri S1-S2 doğal. Üfürüm yok.
+
+GASTROİNTESTİNAL:
+Batın yumuşak, defans yok.
+Hepatomegali / splenomegali yok.
+
+GENİTOÜRİNER:
+Doğal. Döküntü yok.
+
+KAS-İSKELET:
+Eklem hareketleri doğal. Deformite yok.
+
+NÖROLOJİK:
+Bilinç açık. Tonus ve refleksler doğal.
+
+DERİ:
+Döküntü yok. Turgor-tonus normal.
+</textarea>
+
+<button onclick="kopyala()">📋 Metni Kopyala</button>
+
+<p><small>
+⚠️ Şablondur. Klinik duruma göre düzenlenmelidir.
+</small></p>
+
+</div>
+
+<div class="back">
+<a href="index.html">← Ana Sayfa</a>
+</div>
+</div>
+
+<script>
+function kopyala(){
+let text=document.getElementById("note");
+text.select();
+document.execCommand("copy");
+alert("Fizik muayene notu kopyalandı.");
+}
+</script>
+
+</body>
+</html>
