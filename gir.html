@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>MARPED – GIR Hesaplama</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+header{background:#6f42c1;color:white;padding:15px;text-align:center}
+.container{padding:20px;max-width:500px;margin:auto}
+.card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+input,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
+button{background:#6f42c1;color:white;border:none;border-radius:8px}
+.result{margin-top:15px;font-size:15px}
+.back{text-align:center;margin-top:15px}
+.back a{text-decoration:none;color:#6f42c1}
+small{color:#666}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>GIR → Dekstroz Hesaplama</h2>
+<p>TPN Klinik Destek</p>
+</header>
+
+<div class="container">
+<div class="card">
+
+<label>Kilo (kg)</label>
+<input type="number" id="kg" placeholder="Örn: 10">
+
+<label>Hedef GIR (mg/kg/dk)</label>
+<input type="number" id="gir" placeholder="Örn: 6">
+
+<label>Toplam sıvı (ml/gün)</label>
+<input type="number" id="vol" placeholder="Örn: 200">
+
+<button onclick="hesapla()">Hesapla</button>
+
+<div class="result" id="sonuc"></div>
+
+</div>
+
+<div class="back">
+<a href="index.html">← Ana Sayfa</a>
+</div>
+</div>
+
+<script>
+function hesapla(){
+let kg=parseFloat(document.getElementById("kg").value);
+let gir=parseFloat(document.getElementById("gir").value);
+let vol=parseFloat(document.getElementById("vol").value);
+
+if(kg<=0||gir<=0||vol<=0){
+document.getElementById("sonuc").innerHTML="Lütfen tüm alanları doldurun.";
+return;
+}
+
+// Gerekli dekstroz yüzdesi
+let dex = (gir * kg * 1440) / (vol * 10);
+
+// Pratik çözümler
+let d10 = (dex/10*vol).toFixed(0);
+let d20 = (dex/20*vol).toFixed(0);
+let d30 = (dex/30*vol).toFixed(0);
+
+document.getElementById("sonuc").innerHTML=
+`<b>Gerekli dekstroz konsantrasyonu:</b> %${dex.toFixed(1)}<br><br>
+
+<b>Pratik hazırlama örnekleri:</b><br>
+• D10 kullanılırsa: ${d10} ml D10 + ${vol-d10} ml diğer sıvı<br>
+• D20 kullanılırsa: ${d20} ml D20 + ${vol-d20} ml diğer sıvı<br>
+• D30 kullanılırsa: ${d30} ml D30 + ${vol-d30} ml diğer sıvı<br><br>
+
+<small>
+⚠️ Santral/periferik hat, osmolarite ve klinik durum dikkate alınmalıdır.<br>
+Nihai sorumluluk hekimindir.
+</small>`;
+}
+</script>
+
+</body>
+</html>
