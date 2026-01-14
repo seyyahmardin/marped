@@ -32,4 +32,68 @@ button{background:#198754;color:#fff;border:none;border-radius:8px}
 <option value="">Seçiniz</option>
 <option value="amoks">Amoksisilin</option>
 <option value="amp">Ampisilin</option>
-<option value="cefotax">Sefotaksim<
+<option value="cefotax">Sefotaksim</option>
+<option value="ceftriax">Seftriakson</option>
+<option value="vanco">Vankomisin</option>
+</select>
+
+<label>Kilo (kg)</label>
+<input type="number" id="kg" placeholder="Örn: 12">
+
+<button onclick="hesapla()">Hesapla</button>
+
+<div class="result" id="sonuc"></div>
+
+</div>
+
+<div class="back">
+<a href="index.html">← Ana Sayfa</a>
+</div>
+</div>
+
+<script>
+function hesapla(){
+let ab=document.getElementById("ab").value;
+let kg=parseFloat(document.getElementById("kg").value);
+let s="";
+
+if(!ab||kg<=0){
+document.getElementById("sonuc").innerHTML="Lütfen geçerli değer giriniz.";
+return;
+}
+
+if(ab=="amoks"){
+let g=kg*50;
+s=`<b>Amoksisilin</b><br>Günlük: ${g} mg<br>3x1: ${(g/3).toFixed(0)} mg`;
+}
+
+if(ab=="amp"){
+let g=kg*100;
+s=`<b>Ampisilin</b><br>Günlük: ${g} mg<br>4x1: ${(g/4).toFixed(0)} mg`;
+}
+
+if(ab=="cefotax"){
+let g=kg*150;
+if(g>12000) g=12000;
+s=`<b>Sefotaksim</b><br>Günlük: ${g} mg<br>3–4 doza bölünür`;
+}
+
+if(ab=="ceftriax"){
+let g=kg*75;
+if(g>2000) g=2000;
+s=`<b>Seftriakson</b><br>Günlük: ${g} mg<br>1–2 doz`;
+}
+
+if(ab=="vanco"){
+let g=kg*40;
+if(g>2000) g=2000;
+s=`<b>Vankomisin</b><br>Günlük: ${g} mg<br>4 doza bölünür<br><small>Trough düzeyi izlenmelidir</small>`;
+}
+
+document.getElementById("sonuc").innerHTML=
+s+"<br><br><small>⚠️ Klinik karar destek aracıdır.</small>";
+}
+</script>
+
+</body>
+</html>
