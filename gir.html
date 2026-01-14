@@ -2,18 +2,18 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>MARPED – GIR Hesaplama</title>
+<title>MARPED – GIR & Dekstroz</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{font-family:Arial;background:#f4f6f8;margin:0}
 header{background:#6f42c1;color:white;padding:15px;text-align:center}
-.container{padding:20px;max-width:500px;margin:auto}
+.container{padding:20px;max-width:520px;margin:auto}
 .card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
 input,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
 button{background:#6f42c1;color:white;border:none;border-radius:8px}
 .result{margin-top:15px;font-size:15px}
-.back{text-align:center;margin-top:15px}
-.back a{text-decoration:none;color:#6f42c1}
+.ok{color:#146c43;font-weight:bold}
+.bad{color:#b02a37;font-weight:bold}
 small{color:#666}
 </style>
 </head>
@@ -21,8 +21,8 @@ small{color:#666}
 <body>
 
 <header>
-<h2>GIR → Dekstroz Hesaplama</h2>
-<p>TPN Klinik Destek</p>
+<h2>GIR → Dekstroz Uygunluk Hesabı</h2>
+<p>D5 – D10 – D20 – D30</p>
 </header>
 
 <div class="container">
@@ -42,42 +42,41 @@ small{color:#666}
 <div class="result" id="sonuc"></div>
 
 </div>
-
-<div class="back">
-<a href="index.html">← Ana Sayfa</a>
-</div>
 </div>
 
 <script>
+function satir(dex, vol, gerekli){
+let max = vol * (dex/100);
+if(max >= gerekli){
+let ml = (gerekli / (dex/100)).toFixed(0);
+return `<div class="ok">✅ D${dex}: ${ml} ml D${dex} + ${vol-ml} ml glukozsuz sıvı</div>`;
+}else{
+return `<div class="bad">❌ D${dex}: yetersiz (maks ${max.toFixed(1)} g)</div>`;
+}
+}
+
 function hesapla(){
-let kg=parseFloat(document.getElementById("kg").value);
-let gir=parseFloat(document.getElementById("gir").value);
-let vol=parseFloat(document.getElementById("vol").value);
+let kg=+document.getElementById("kg").value;
+let gir=+document.getElementById("gir").value;
+let vol=+document.getElementById("vol").value;
 
 if(kg<=0||gir<=0||vol<=0){
-document.getElementById("sonuc").innerHTML="Lütfen tüm alanları doldurun.";
+sonuc.innerHTML="Lütfen tüm alanları doldurun.";
 return;
 }
 
-// Gerekli dekstroz yüzdesi
-let dex = (gir * kg * 1440) / (vol * 10);
+let glukoz = gir * kg * 1440 / 1000;
 
-// Pratik çözümler
-let d10 = (dex/10*vol).toFixed(0);
-let d20 = (dex/20*vol).toFixed(0);
-let d30 = (dex/30*vol).toFixed(0);
-
-document.getElementById("sonuc").innerHTML=
-`<b>Gerekli dekstroz konsantrasyonu:</b> %${dex.toFixed(1)}<br><br>
-
-<b>Pratik hazırlama örnekleri:</b><br>
-• D10 kullanılırsa: ${d10} ml D10 + ${vol-d10} ml diğer sıvı<br>
-• D20 kullanılırsa: ${d20} ml D20 + ${vol-d20} ml diğer sıvı<br>
-• D30 kullanılırsa: ${d30} ml D30 + ${vol-d30} ml diğer sıvı<br><br>
-
+sonuc.innerHTML =
+`<b>Günlük gerekli glukoz:</b> ${glukoz.toFixed(1)} g<br><br>
+${satir(5,vol,glukoz)}
+${satir(10,vol,glukoz)}
+${satir(20,vol,glukoz)}
+${satir(30,vol,glukoz)}
+<br>
 <small>
-⚠️ Santral/periferik hat, osmolarite ve klinik durum dikkate alınmalıdır.<br>
-Nihai sorumluluk hekimindir.
+⚠️ Uygun seçenek yoksa hacmi artırın veya GIR’i düşürün.<br>
+Nihai sorumluluk klinisyene aittir.
 </small>`;
 }
 </script>
