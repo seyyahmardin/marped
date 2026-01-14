@@ -45,15 +45,27 @@ small{color:#666}
 </div>
 
 <script>
+<script>
 function satir(dex, vol, gerekli){
-let max = vol * (dex/100);
-if(max >= gerekli){
-let ml = (gerekli / (dex/100)).toFixed(0);
-return `<div class="ok">✅ D${dex}: ${ml} ml D${dex} + ${vol-ml} ml glukozsuz sıvı</div>`;
-}else{
-return `<div class="bad">❌ D${dex}: yetersiz (maks ${max.toFixed(1)} g)</div>`;
+  let g_per_ml = dex / 100;
+  let max_g = vol * g_per_ml;
+
+  if(max_g < gerekli){
+    return `<div class="bad">❌ D${dex}: yetersiz (maks ${max_g.toFixed(1)} g)</div>`;
+  }
+
+  // Gerekli DEX hacmi
+  let ml_dex = gerekli / g_per_ml;
+
+  // Kalan hacim D5 ile tamamlanır
+  let ml_d5 = vol - ml_dex;
+
+  return `<div class="ok">
+  ✅ D${dex}: ${ml_dex.toFixed(0)} ml D${dex} + ${ml_d5.toFixed(0)} ml D5
+  </div>`;
 }
-}
+</script>
+
 
 function hesapla(){
 let kg=+document.getElementById("kg").value;
