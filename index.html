@@ -1,89 +1,172 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>MARPED</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-}
-header{
-  background:#0b5ed7;
-  color:white;
-  padding:20px;
-  text-align:center;
-}
-.container{
-  padding:20px;
-}
-.card{
-  background:white;
-  border-radius:12px;
-  padding:20px;
-  margin-bottom:15px;
-  text-align:center;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-.card a{
-  text-decoration:none;
-  color:#0b5ed7;
-  font-size:18px;
-  font-weight:bold;
-  display:block;
-}
-footer{
-  text-align:center;
-  font-size:12px;
-  color:#666;
-  padding:15px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>MAR PED | Pediatrik Hesaplama Platformu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f2f8ff;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+      padding: 30px 15px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 16px;
+      opacity: 0.95;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 30px 15px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .icon {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      margin: 10px 0;
+      color: #0077cc;
+    }
+
+    .card p {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .card a {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 18px;
+      background: #4facfe;
+      color: white;
+      text-decoration: none;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .card a:hover {
+      background: #0077cc;
+    }
+
+    footer {
+      background: #eaf2fb;
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #555;
+      margin-top: 40px;
+    }
+
+    .warning {
+      max-width: 900px;
+      margin: 20px auto 0;
+      padding: 15px;
+      background: #fff3cd;
+      border-left: 5px solid #ff9800;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-  <div style="font-size:34px;font-weight:bold;letter-spacing:2px;">
-    MAR<span style="color:#ffc107">PED</span>
-  </div>
-  <div style="font-size:14px;opacity:0.9;margin-top:5px;">
-    Mardin Pediatri Kliniği Hesaplama Platformu
-  </div>
+  <h1>MAR PED</h1>
+  <p>Mardin Pediatri Kliniği – Hesaplama & Klinik Destek Platformu</p>
 </header>
-
 
 <div class="container">
 
-  <div class="card">
-    <a href="sivi.html">🧮 Sıvı Hesaplama</a>
+  <div class="cards">
+
+    <div class="card">
+      <div class="icon">💧</div>
+      <h3>Sıvı Hesaplama</h3>
+      <p>Çocuğun kilosuna göre günlük sıvı ihtiyacını hızlıca hesaplayın.</p>
+      <a href="sivi.html">Hesapla</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">💊</div>
+      <h3>Antibiyotik Doz</h3>
+      <p>Pediyatrik antibiyotikler için yaklaşık doz hesaplama aracı.</p>
+      <a href="antibiyotik.html">Hesapla</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">🧪</div>
+      <h3>TPN Hesaplama</h3>
+      <p>Total Parenteral Nütrisyon için temel hesaplamalar.</p>
+      <a href="tpn.html">Hesapla</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">🩺</div>
+      <h3>Fizik Muayene</h3>
+      <p>Pediyatrik fizik muayene için hazır şablon.</p>
+      <a href="muayene.html">Aç</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">🍬</div>
+      <h3>GIR → Dekstroz</h3>
+      <p>Glukoz infüzyon hızı (GIR) ve dekstroz hesaplama.</p>
+      <a href="gir.html">Hesapla</a>
+    </div>
+
   </div>
 
-  <div class="card">
-    <a href="antibiyotik.html">💊 Antibiyotik Doz Hesaplama</a>
+  <div class="warning">
+    ⚠️ <strong>Tıbbi Uyarı:</strong>  
+    Bu platform klinik karar destek amaçlıdır. Hesaplamalar bilgilendirme içindir.  
+    Nihai tanı ve tedavi kararı hekime aittir.
   </div>
 
-  <div class="card">
-    <a href="tpn.html">🧪 TPN Hesaplama</a>
-  </div>
-
-<div class="card">
-  <a href="fizikmuayene.html">🩺 Fizik Muayene Şablonu</a>
-</div>
-
-<div class="card">
-  <a href="gir.html">🧪 GIR → Dekstroz Hesaplama</a>
 </div>
 
 <footer>
-⚠️ Bu site klinik karar destek aracıdır. Nihai sorumluluk hekimindir.
+  © 2026 MAR PED • Pediatrik Klinik Destek • GitHub Pages
 </footer>
 
 </body>
 </html>
-
-
-
-
