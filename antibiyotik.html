@@ -2,101 +2,142 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>MARPED – Antibiyotik Doz</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pediyatrik Antibiyotik Doz Hesaplama</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body{font-family:Arial;background:#f4f6f8;margin:0}
-header{background:#198754;color:#fff;padding:15px;text-align:center}
-.container{padding:20px;max-width:420px;margin:auto}
-.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-select,input,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
-button{background:#198754;color:#fff;border:none;border-radius:8px}
-.result{margin-top:15px;font-size:15px}
-.back{text-align:center;margin-top:15px}
-.back a{text-decoration:none;color:#198754}
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f8ff;
+  margin: 0;
+}
+.container {
+  max-width: 600px;
+  background: #fff;
+  margin: 30px auto;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+h1 {
+  text-align: center;
+  color: #0077cc;
+}
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  font-size: 16px;
+}
+button {
+  background: #4facfe;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  margin-top: 20px;
+}
+button:hover {
+  background: #0077cc;
+}
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  background: #eaf2fb;
+  border-left: 5px solid #4facfe;
+  border-radius: 10px;
+}
+.warning {
+  margin-top: 20px;
+  background: #fff3cd;
+  padding: 12px;
+  border-left: 5px solid #ff9800;
+  border-radius: 10px;
+  font-size: 13px;
+}
 </style>
 </head>
 
 <body>
-<div class="menu-bar">
-  <a href="index.html" class="menu-button">
-    🏠 Ana Menü
-  </a>
-</div>
-
-<header>
-<h2>Antibiyotik Doz Hesaplama</h2>
-<p>Pediatrik mg/kg doz</p>
-</header>
 
 <div class="container">
-<div class="card">
+<h1>Antibiyotik Doz Hesaplama</h1>
 
 <label>Antibiyotik</label>
-<select id="ab">
-<option value="">Seçiniz</option>
-<option value="amoks">Amoksisilin</option>
-<option value="amp">Ampisilin</option>
-<option value="cefotax">Sefotaksim</option>
-<option value="ceftriax">Seftriakson</option>
-<option value="vanco">Vankomisin</option>
+<select id="antibiotic">
+  <option value="">Seçiniz</option>
+  <option value="amoksisilin">Amoksisilin</option>
+  <option value="ampisilin">Ampisilin</option>
+  <option value="sefotaksim">Sefotaksim</option>
+  <option value="seftriakson">Seftriakson</option>
+  <option value="vankomisin">Vankomisin</option>
+</select>
+
+<label>Yaş Grubu</label>
+<select id="age">
+  <option value="">Seçiniz</option>
+  <option value="yenidogan">Yenidoğan</option>
+  <option value="bebek">Bebek (1-12 ay)</option>
+  <option value="cocuk">Çocuk</option>
 </select>
 
 <label>Kilo (kg)</label>
-<input type="number" id="kg" placeholder="Örn: 12">
+<input type="number" id="weight" placeholder="Örn: 12">
 
-<button onclick="hesapla()">Hesapla</button>
+<label>Doz Bölme (günde)</label>
+<select id="split">
+  <option value="2">2 x</option>
+  <option value="3">3 x</option>
+  <option value="4">4 x</option>
+</select>
 
-<div class="result" id="sonuc"></div>
+<button onclick="calculate()">Hesapla</button>
 
+<div class="result" id="result"></div>
+
+<div class="warning">
+⚠️ Bu hesaplama bilgilendirme amaçlıdır. Klinik karar yerine geçmez.
 </div>
 
-<div class="back">
-<a href="index.html">← Ana Sayfa</a>
-</div>
 </div>
 
 <script>
-function hesapla(){
-let ab=document.getElementById("ab").value;
-let kg=parseFloat(document.getElementById("kg").value);
-let s="";
+function calculate() {
+  const ab = document.getElementById("antibiotic").value;
+  const age = document.getElementById("age").value;
+  const weight = parseFloat(document.getElementById("weight").value);
+  const split = parseInt(document.getElementById("split").value);
+  const res = document.getElementById("result");
 
-if(!ab||kg<=0){
-document.getElementById("sonuc").innerHTML="Lütfen geçerli değer giriniz.";
-return;
-}
+  if (!ab || !age || !weight || weight <= 0) {
+    res.innerHTML = "Lütfen tüm alanları doldurunuz.";
+    return;
+  }
 
-if(ab=="amoks"){
-let g=kg*50;
-s=`<b>Amoksisilin</b><br>Günlük: ${g} mg<br>3x1: ${(g/3).toFixed(0)} mg`;
-}
+  // mg/kg/gün – örnek klinik referans aralıkları
+  const doseTable = {
+    amoksisilin: { yenidogan: 30, bebek: 40, cocuk: 50 },
+    ampisilin: { yenidogan: 40, bebek: 50, cocuk: 60 },
+    sefotaksim: { yenidogan: 100, bebek: 150, cocuk: 150 },
+    seftriakson: { yenidogan: 50, bebek: 75, cocuk: 75 },
+    vankomisin: { yenidogan: 30, bebek: 40, cocuk: 40 }
+  };
 
-if(ab=="amp"){
-let g=kg*100;
-s=`<b>Ampisilin</b><br>Günlük: ${g} mg<br>4x1: ${(g/4).toFixed(0)} mg`;
-}
+  const mgKgDay = doseTable[ab][age];
+  const totalDaily = mgKgDay * weight;
+  const singleDose = totalDaily / split;
 
-if(ab=="cefotax"){
-let g=kg*150;
-if(g>12000) g=12000;
-s=`<b>Sefotaksim</b><br>Günlük: ${g} mg<br>3–4 doza bölünür`;
-}
-
-if(ab=="ceftriax"){
-let g=kg*75;
-if(g>2000) g=2000;
-s=`<b>Seftriakson</b><br>Günlük: ${g} mg<br>1–2 doz`;
-}
-
-if(ab=="vanco"){
-let g=kg*40;
-if(g>2000) g=2000;
-s=`<b>Vankomisin</b><br>Günlük: ${g} mg<br>4 doza bölünür<br><small>Trough düzeyi izlenmelidir</small>`;
-}
-
-document.getElementById("sonuc").innerHTML=
-s+"<br><br><small>⚠️ Klinik karar destek aracıdır.</small>";
+  res.innerHTML = `
+    <strong>Sonuç</strong><br><br>
+    🔹 <strong>${mgKgDay} mg/kg/gün</strong><br>
+    🔹 <strong>Toplam günlük doz:</strong> ${totalDaily.toFixed(0)} mg<br>
+    🔹 <strong>Doz bölme:</strong> günde ${split} x<br>
+    🔹 <strong>Tek doz:</strong> ${singleDose.toFixed(0)} mg
+  `;
 }
 </script>
 
