@@ -106,6 +106,121 @@ button:hover {
 </div>
 
 <script>
+  <script>
+const TND_ANTIBIYOTIKLER = {
+
+  ampisilin: {
+    ad: "Ampisilin",
+    yol: "IV / IM",
+    endikasyon: {
+      sepsis: [
+        { ghMax: 34, gunMax: 7, doz: "50 mg/kg/doz", aralik: "12 saatte bir" },
+        { ghMax: 34, gunMin: 8, doz: "75 mg/kg/doz", aralik: "12 saatte bir" },
+        { ghMin: 35, gunMax: 28, doz: "50 mg/kg/doz", aralik: "8 saatte bir" }
+      ],
+      menenjit: [
+        { ghMax: 34, gunMax: 7, doz: "100 mg/kg/doz", aralik: "8 saatte bir" },
+        { ghMax: 34, gunMin: 8, doz: "75 mg/kg/doz", aralik: "6 saatte bir" },
+        { ghMin: 35, gunMax: 28, doz: "100 mg/kg/doz", aralik: "8 saatte bir" }
+      ]
+    }
+  },
+
+  gentamisin: {
+    ad: "Gentamisin",
+    yol: "IV / IM",
+    endikasyon: {
+      sepsis: [
+        { ghMax: 29, gunMax: 7, doz: "5 mg/kg/doz", aralik: "48 saatte bir" },
+        { ghMax: 29, gunMin: 8, doz: "4 mg/kg/doz", aralik: "36 saatte bir" },
+        { ghMin: 30, ghMax: 34, gunMax: 7, doz: "4.5 mg/kg/doz", aralik: "36 saatte bir" },
+        { ghMin: 35, doz: "4 mg/kg/doz", aralik: "24 saatte bir" }
+      ]
+    }
+  },
+
+  amikasin: {
+    ad: "Amikasin",
+    yol: "IV / IM",
+    endikasyon: {
+      sepsis: [
+        { ghMax: 29, gunMax: 7, doz: "14 mg/kg/doz", aralik: "48 saatte bir" },
+        { ghMax: 29, gunMin: 8, doz: "12 mg/kg/doz", aralik: "36 saatte bir" },
+        { ghMin: 30, ghMax: 34, doz: "12 mg/kg/doz", aralik: "24–36 saatte bir" },
+        { ghMin: 35, doz: "12 mg/kg/doz", aralik: "24 saatte bir" }
+      ]
+    }
+  },
+
+  sefotaksim: {
+    ad: "Sefotaksim",
+    yol: "IV / IM",
+    endikasyon: {
+      sepsis: [
+        { ghMin: 32, gunMin: 7, doz: "50 mg/kg/doz", aralik: "6–8 saatte bir" },
+        { ghMax: 31, gunMin: 7, doz: "50 mg/kg/doz", aralik: "8 saatte bir" }
+      ],
+      menenjit: [
+        { gunMax: 7, doz: "100–150 mg/kg/gün", aralik: "8–12 saatte bir" },
+        { gunMin: 8, doz: "150–200 mg/kg/gün", aralik: "6–8 saatte bir" }
+      ]
+    }
+  },
+
+  seftriakson: {
+    ad: "Seftriakson",
+    yol: "IV",
+    endikasyon: {
+      sepsis: [
+        { doz: "50–75 mg/kg/gün", aralik: "24 saatte bir" }
+      ]
+    }
+  },
+
+  vankomisin: {
+    ad: "Vankomisin",
+    yol: "IV",
+    endikasyon: {
+      sepsis: [
+        { ghMax: 29, gunMax: 14, doz: "10 mg/kg/doz", aralik: "18 saatte bir" },
+        { ghMin: 30, doz: "10 mg/kg/doz", aralik: "12 saatte bir" }
+      ],
+      menenjit: [
+        { doz: "15 mg/kg/doz", aralik: "8–12 saatte bir" }
+      ]
+    }
+  },
+
+  meropenem: {
+    ad: "Meropenem",
+    yol: "IV",
+    endikasyon: {
+      sepsis: [
+        { ghMax: 31, gunMax: 14, doz: "20 mg/kg/doz", aralik: "12 saatte bir" },
+        { ghMin: 32, gunMin: 15, doz: "30 mg/kg/doz", aralik: "8 saatte bir" }
+      ],
+      menenjit: [
+        { doz: "40 mg/kg/doz", aralik: "8 saatte bir" }
+      ]
+    }
+  },
+
+  flukonazol: {
+    ad: "Flukonazol",
+    yol: "IV / PO",
+    endikasyon: {
+      tedavi: [
+        { ghMax: 29, doz: "Yükleme 12–25 mg/kg, idame 6–12 mg/kg", aralik: "24–48 saatte bir" }
+      ],
+      profilaksi: [
+        { doz: "3–6 mg/kg/doz", aralik: "Haftada 2 kez" }
+      ]
+    }
+  }
+
+};
+</script>
+
 function calculate() {
   const ab = document.getElementById("antibiotic").value;
   const age = document.getElementById("age").value;
