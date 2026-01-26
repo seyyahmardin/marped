@@ -1,62 +1,98 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>MARPED – Fizik Muayene Şablonu</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{font-family:Arial;background:#f4f6f8;margin:0}
-header{background:#0b5ed7;color:white;padding:15px;text-align:center}
-.container{padding:20px;max-width:700px;margin:auto}
-.card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-textarea{width:100%;height:400px;padding:10px;font-size:14px}
-button{margin-top:10px;padding:10px;font-size:16px;width:100%;
-background:#0b5ed7;color:white;border:none;border-radius:8px}
-.back{text-align:center;margin-top:15px}
-.back a{text-decoration:none;color:#0b5ed7}
-small{color:#666}
-</style>
+  <meta charset="UTF-8">
+  <title>MARPED – Fizik Muayene Şablonu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding-bottom: 90px; /* bottom menü + boşluk */
+    }
+    header {
+      background: #0b5ed7;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.1);
+    }
+    textarea {
+      width: 100%;
+      height: 400px;
+      padding: 10px;
+      font-size: 14px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      background: #0b5ed7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .back {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .back a {
+      text-decoration: none;
+      color: #0b5ed7;
+    }
+    small {
+      color: #666;
+    }
+    .bottom-menu {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #6f42c1;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      z-index: 1000;
+    }
+    .bottom-menu a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      text-align: center;
+      flex: 1;
+    }
+    .bottom-menu span {
+      font-size: 12px;
+    }
+  </style>
 </head>
-<style>
-.bottom-menu{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:#6f42c1;
-  display:flex;
-  justify-content:space-around;
-  padding:8px 0;
-  z-index:1000;
-}
-
-.bottom-menu a{
-  color:white;
-  text-decoration:none;
-  font-size:14px;
-  text-align:center;
-  flex:1;
-}
-
-.bottom-menu span{
-  font-size:12px;
-}
-body{
-  padding-bottom:70px; /* menü içeriği kapatmasın diye */
-}
-</style>
 
 <body>
 
 <header>
-<h2>Fizik Muayene Şablonu</h2>
-<p>Pediatrik Standart Not</p>
+  <h2>Fizik Muayene Şablonu</h2>
+  <p>Pediatrik Standart Not</p>
 </header>
 
 <div class="container">
-<div class="card">
+  <div class="card">
 
-<textarea id="note">
+    <textarea id="note">
 GENEL DURUM:
 Bilinç açık, koopere, oryante. Genel durumu iyi / orta / kötü.
 
@@ -99,29 +135,29 @@ Bilinç açık. Tonus ve refleksler doğal.
 
 DERİ:
 Döküntü yok. Turgor-tonus normal.
-</textarea>
+    </textarea>
 
-<button onclick="kopyala()">📋 Metni Kopyala</button>
+    <button onclick="kopyala()">📋 Metni Kopyala</button>
 
-<p><small>
-⚠️ Şablondur. Klinik duruma göre düzenlenmelidir.
-</small></p>
+    <p><small>⚠️ Şablondur. Klinik duruma göre düzenlenmelidir.</small></p>
 
-</div>
+  </div>
 
-<div class="back">
-<a href="index.html">← Ana Sayfa</a>
-</div>
+  <div class="back">
+    <a href="index.html">← Ana Sayfa</a>
+  </div>
 </div>
 
 <script>
-function kopyala(){
-let text=document.getElementById("note");
-text.select();
-document.execCommand("copy");
-alert("Fizik muayene notu kopyalandı.");
+function kopyala() {
+  let text = document.getElementById("note");
+  text.select();
+  text.setSelectionRange(0, 99999); // mobil için
+  document.execCommand("copy");
+  alert("Fizik muayene notu panoya kopyalandı!");
 }
 </script>
+
 <div class="bottom-menu">
   <a href="index.html">
     🏠<br><span>Ana Menü</span>
