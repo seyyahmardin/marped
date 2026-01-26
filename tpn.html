@@ -31,11 +31,11 @@
     }
     label {
       display: block;
-      margin: 12px 0 4px;
+      margin: 10px 0 4px;
       font-weight: 500;
       font-size: 0.95rem;
     }
-    select, input[type="number"], input[type="text"] {
+    select, input[type="number"] {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
@@ -43,10 +43,22 @@
       font-size: 1rem;
       box-sizing: border-box;
     }
+    .electrolyte-group {
+      margin: 16px 0;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+    .electrolyte-group h4 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      color: #6f42c1;
+    }
     button {
       width: 100%;
       padding: 12px;
-      margin: 12px 0 8px;
+      margin: 12px 0;
       background: #6f42c1;
       color: white;
       border: none;
@@ -107,7 +119,7 @@
 
 <header>
   <h2>TPN Hesaplama</h2>
-  <p>Pediatrik Total Parenteral Beslenme + GIR → Glukoz Karışımı</p>
+  <p>Pediatrik Total Parenteral Beslenme + Elektrolit / Vitamin</p>
 </header>
 
 <div class="container">
@@ -124,8 +136,22 @@
     <label>Kilo (kg)</label>
     <input type="number" id="kg" step="0.01" min="0.4" placeholder="Örn: 1.25">
 
-    <label>Toplam sıvı hedefi (mL/kg/gün)</label>
-    <input type="number" id="sivi" step="1" value="100" min="60" max="160">
+    <label>Boy (cm) – VYA hesabı için opsiyonel</label>
+    <input type="number" id="boy" step="1" min="30" placeholder="Örn: 50 (böbrek hastalarında zorunlu)">
+
+    <label>Sıvı hedefi birimi</label>
+    <select id="sivi_birim">
+      <option value="kg">mL/kg/gün</option>
+      <option value="m2">mL/m²/gün</option>
+    </select>
+
+    <label>Sıvı hedefi değeri</label>
+    <select id="sivi_deger">
+      <option value="100">100 mL/kg (veya 1200 mL/m²)</option>
+      <option value="120">120 mL/kg (veya 1500 mL/m²)</option>
+      <option value="140">140 mL/kg (veya 1700 mL/m²)</option>
+      <option value="160">160 mL/kg (veya 2000 mL/m²)</option>
+    </select>
 
     <label>Hedef enerji (kcal/kg/gün)</label>
     <input type="number" id="enerji" step="1" value="80" min="40" max="120">
@@ -133,11 +159,37 @@
     <label>Protein hedefi (g/kg/gün)</label>
     <input type="number" id="protein" step="0.1" value="2.5" min="1.0" max="4.0">
 
-    <label>Lipid oranı (non-protein kalorinin %)</label>
-    <input type="number" id="lipid_yuzde" step="5" value="35" min="20" max="50">
+    <label>Lipid hedefi (g/kg/gün)</label>
+    <input type="number" id="lipid_hed" step="0.1" value="2" min="0" max="4">
 
-    <label>Hedef GIR (mg/kg/dk) – Glukoz için</label>
+    <label>Hedef GIR (mg/kg/dk)</label>
     <input type="number" id="hedef_gir" step="0.1" value="8" min="4" max="14">
+
+    <!-- Elektrolit / Vitamin -->
+    <div class="electrolyte-group">
+      <h4>Elektrolit / Mineral / Vitamin (kg başına günlük hedef)</h4>
+      
+      <label>Sodyum (Na) mmol/kg/gün</label>
+      <input type="number" id="na" step="0.1" value="2" min="0">
+
+      <label>Potasyum Klorür (K) mmol/kg/gün</label>
+      <input type="number" id="k" step="0.1" value="2" min="0">
+
+      <label>Potasyum Fosfat (P katkısı) mmol/kg/gün</label>
+      <input type="number" id="p" step="0.1" value="0.5" min="0">
+
+      <label>Kalsiyum glukonat (Ca) mmol/kg/gün</label>
+      <input type="number" id="ca" step="0.1" value="1" min="0">
+
+      <label>Magnezyum sülfat (Mg) mmol/kg/gün</label>
+      <input type="number" id="mg" step="0.1" value="0.2" min="0">
+
+      <label>Cernevit (multivitamin) mL/gün</label>
+      <input type="number" id="cernevit" step="0.1" value="1" min="0">
+
+      <label>Tracutil (trace element) mL/gün</label>
+      <input type="number" id="tracutil" step="0.1" value="0.1" min="0">
+    </div>
 
     <button onclick="hesaplaTPN()">Hesapla</button>
 
@@ -147,27 +199,52 @@
 
   <div class="note">
     ⚠️ Lipid %20, Aminoasit %10 solüsyon varsayıldı.<br>
-    GIR ve glukoz karışımı hesapları kalan sıvıya göre otomatik yapılır.<br>
-    Periferik ven için max %12-13 dekstroz önerilir.<br>
-    Klinik durum ve laboratuvara göre ayarlayınız.
+    VYA hesabı: Boy girilmediyse (kg×4+7)/(90+kg) formülü kullanılır.<br>
+    Böbrek hastalarında boy girerek √(kg×boy)/60 formülünü seçin.<br>
+    Elektrolit değerleri kg başına günlük hedef olarak girilmelidir.<br>
+    Boş bırakılanlar 0 kabul edilir.
   </div>
 </div>
 
 <script>
+function vyaHesapla(kg, boy) {
+  if (boy && boy > 0) {
+    return Math.sqrt(kg * boy) / 60; // √(kg × boy / 3600) = sqrt(kg*boy)/60
+  } else {
+    return (kg * 4 + 7) / (90 + kg);
+  }
+}
+
 function otomatikDoldur() {
   const grup = document.getElementById("grup").value;
   if (grup === "yenidogan") {
-    document.getElementById("sivi").value = 90;
+    document.getElementById("sivi_birim").value = "kg";
+    document.getElementById("sivi_deger").value = "90";
     document.getElementById("enerji").value = 80;
     document.getElementById("protein").value = 3.0;
-    document.getElementById("lipid_yuzde").value = 30;
-    document.getElementById("hedef_gir").value = 6; // yenidoğan başlangıç düşük
+    document.getElementById("lipid_hed").value = 2.0;
+    document.getElementById("hedef_gir").value = 6;
+    document.getElementById("na").value = 1;
+    document.getElementById("k").value = 1;
+    document.getElementById("p").value = 0.5;
+    document.getElementById("ca").value = 0.8;
+    document.getElementById("mg").value = 0.1;
+    document.getElementById("cernevit").value = 1;
+    document.getElementById("tracutil").value = 0.1;
   } else {
-    document.getElementById("sivi").value = 100;
+    document.getElementById("sivi_birim").value = "kg";
+    document.getElementById("sivi_deger").value = "100";
     document.getElementById("enerji").value = 80;
     document.getElementById("protein").value = 2.5;
-    document.getElementById("lipid_yuzde").value = 35;
+    document.getElementById("lipid_hed").value = 2.0;
     document.getElementById("hedef_gir").value = 8;
+    document.getElementById("na").value = 2;
+    document.getElementById("k").value = 2;
+    document.getElementById("p").value = 0.7;
+    document.getElementById("ca").value = 1.0;
+    document.getElementById("mg").value = 0.3;
+    document.getElementById("cernevit").value = 1;
+    document.getElementById("tracutil").value = 0.1;
   }
 }
 
@@ -175,45 +252,59 @@ function kombinasyon(c1, c2, vol, hedef_glukoz) {
   let g1 = c1 / 100, g2 = c2 / 100;
   let x = (hedef_glukoz - g2 * vol) / (g1 - g2);
   if (x < 0 || x > vol) return null;
-  return {
-    d1: c1, ml1: x,
-    d2: c2, ml2: vol - x,
-    maxDex: Math.max(c1, c2)
-  };
+  return { d1: c1, ml1: x, d2: c2, ml2: vol - x, maxDex: Math.max(c1, c2) };
 }
 
 function hesaplaTPN() {
-  const grup   = document.getElementById("grup").value;
-  const kg     = parseFloat(document.getElementById("kg").value)     || 0;
-  const sivi   = parseFloat(document.getElementById("sivi").value)   || 100;
-  const enerji = parseFloat(document.getElementById("enerji").value) || 80;
-  const prot   = parseFloat(document.getElementById("protein").value)|| 2.5;
-  const lipidY = parseFloat(document.getElementById("lipid_yuzde").value) || 35;
-  const hedefGIR = parseFloat(document.getElementById("hedef_gir").value) || 8;
-
-  if (!grup || kg <= 0) {
-    alert("Hasta grubunu seçin ve geçerli kilo girin.");
+  const kg = parseFloat(document.getElementById("kg").value) || 0;
+  if (kg <= 0) {
+    alert("Geçerli kilo giriniz.");
     return;
   }
 
-  // TPN temel hesaplamalar
-  const toplamEnerji   = enerji * kg;
-  const proteinG       = prot   * kg;
-  const proteinKcal    = proteinG * 4;
+  const boy = parseFloat(document.getElementById("boy").value) || 0;
+  const siviBirim = document.getElementById("sivi_birim").value;
+  const siviDeger = parseFloat(document.getElementById("sivi_deger").value) || 100;
+
+  const vya = vyaHesapla(kg, boy);
+  let toplamHacim;
+  if (siviBirim === "m2") {
+    toplamHacim = vya * siviDeger;
+  } else {
+    toplamHacim = kg * siviDeger;
+  }
+
+  const enerji = parseFloat(document.getElementById("enerji").value) || 80;
+  const prot = parseFloat(document.getElementById("protein").value) || 2.5;
+  const lipidHedef = parseFloat(document.getElementById("lipid_hed").value) || 2;
+  const hedefGIR = parseFloat(document.getElementById("hedef_gir").value) || 8;
+
+  const na = parseFloat(document.getElementById("na").value) || 0;
+  const k = parseFloat(document.getElementById("k").value) || 0;
+  const p = parseFloat(document.getElementById("p").value) || 0;
+  const ca = parseFloat(document.getElementById("ca").value) || 0;
+  const mg = parseFloat(document.getElementById("mg").value) || 0;
+  const cernevit = parseFloat(document.getElementById("cernevit").value) || 0;
+  const tracutil = parseFloat(document.getElementById("tracutil").value) || 0;
+
+  // TPN hesaplamalar
+  const toplamEnerji = enerji * kg;
+  const proteinG = prot * kg;
+  const proteinKcal = proteinG * 4;
+  const lipidG = lipidHedef * kg;
+  const lipidKcal = lipidG * 9;
   const nonProteinKcal = toplamEnerji - proteinKcal;
-  const lipidKcal      = nonProteinKcal * (lipidY / 100);
-  const lipidG         = lipidKcal / 9;
-  const glukozG        = (nonProteinKcal - lipidKcal) / 3.4;
-  const toplamHacim    = sivi * kg;
+  const glukozKcal = nonProteinKcal - lipidKcal;
+  const glukozG = glukozKcal / 3.4;
+  const gir = (glukozG * 1000) / (kg * 1440);
 
-  const gir            = (glukozG * 1000) / (kg * 1440);
-  const lipidHacim20   = lipidG * 5;
-  const kalanHacim     = toplamHacim - lipidHacim20;
-  const aaHacim10      = proteinG * 10;
+  const lipidHacim20 = lipidG * 5;
+  const kalanHacim = toplamHacim - lipidHacim20;
+  const aaHacim10 = proteinG * 10;
 
-  // GIR → Glukoz karışımı hesabı (kalan hacim için)
-  let glukozHedef = hedefGIR * kg * 1440 / 1000; // günlük glukoz gram
-  let hedefYuzde  = kalanHacim > 0 ? (glukozHedef / kalanHacim) * 100 : 0;
+  // Glukoz karışımı
+  let glukozHedef = hedefGIR * kg * 1440 / 1000;
+  let hedefYuzde = kalanHacim > 0 ? (glukozHedef / kalanHacim) * 100 : 0;
 
   let combos = [
     kombinasyon(10, 5, kalanHacim, glukozHedef),
@@ -221,10 +312,7 @@ function hesaplaTPN() {
     kombinasyon(30, 20, kalanHacim, glukozHedef)
   ].filter(x => x);
 
-  let bestCombo = null;
-  if (combos.length > 0) {
-    bestCombo = combos.reduce((a, b) => a.maxDex < b.maxDex ? a : b);
-  }
+  let bestCombo = combos.length > 0 ? combos.reduce((a,b)=>a.maxDex < b.maxDex ? a : b) : null;
 
   // Uyarılar
   let uyari = "";
@@ -234,54 +322,59 @@ function hesaplaTPN() {
   // Sonuç HTML
   let html = `
     <table>
+      <tr><td>Vücut Yüzey Alanı (VYA)</td><td>${vya.toFixed(3)} m²</td></tr>
       <tr><td>Toplam enerji</td><td>${toplamEnerji.toFixed(0)} kcal/gün</td></tr>
-      <tr><td>Protein</td><td>${proteinG.toFixed(1)} g/gün  (${prot.toFixed(1)} g/kg)</td></tr>
-      <tr><td>%10 Aminoasit hacmi</td><td>${aaHacim10.toFixed(0)} mL</td></tr>
-      <tr><td>Lipid</td><td>${lipidG.toFixed(1)} g/gün</td></tr>
-      <tr><td>%20 Lipid solüsyon</td><td>${lipidHacim20.toFixed(0)} mL</td></tr>
-      <tr><td>Glukoz / Karbonhidrat</td><td>${glukozG.toFixed(1)} g/gün</td></tr>
-      <tr><td>GIR (hesaplanan)</td><td><b>${gir.toFixed(1)}</b> mg/kg/dk</td></tr>
-      <tr><td>Toplam sıvı</td><td>${toplamHacim.toFixed(0)} mL/gün</td></tr>
-      <tr><td>Kalan hacim (AA + dekstroz)</td><td>${kalanHacim.toFixed(0)} mL</td></tr>
-      <tr><td>Hedef GIR (girdiğiniz)</td><td>${hedefGIR.toFixed(1)} mg/kg/dk</td></tr>
+      <tr><td>Protein</td><td>${proteinG.toFixed(1)} g (${prot.toFixed(1)} g/kg)</td></tr>
+      <tr><td>%10 AA hacmi</td><td>${aaHacim10.toFixed(0)} mL</td></tr>
+      <tr><td>Lipid</td><td>${lipidG.toFixed(1)} g (${lipidHedef.toFixed(1)} g/kg)</td></tr>
+      <tr><td>%20 Lipid</td><td>${lipidHacim20.toFixed(0)} mL</td></tr>
+      <tr><td>Glukoz</td><td>${glukozG.toFixed(1)} g</td></tr>
+      <tr><td>GIR (hesaplanan)</td><td><b>${gir.toFixed(1)} mg/kg/dk</b></td></tr>
+      <tr><td>Toplam sıvı</td><td>${toplamHacim.toFixed(0)} mL/gün (${siviBirim === 'm2' ? (siviDeger + ' mL/m²' : siviDeger + ' mL/kg')})</td></tr>
+      <tr><td>Kalan hacim (AA+glukoz)</td><td>${kalanHacim.toFixed(0)} mL</td></tr>
     </table>
   `;
 
-  // Glukoz karışımı bölümü
+  // Elektrolit tablosu
+  html += `<h5>Elektrolit / Mineral / Vitamin (toplam günlük)</h5><table>`;
+  if (na > 0) html += `<tr><td>Sodyum (Na)</td><td>${(na * kg).toFixed(1)} mmol/gün</td></tr>`;
+  if (k > 0) html += `<tr><td>Potasyum (KCl)</td><td>${(k * kg).toFixed(1)} mmol/gün</td></tr>`;
+  if (p > 0) html += `<tr><td>Fosfat (Potasyum fosfat)</td><td>${(p * kg).toFixed(2)} mmol/gün</td></tr>`;
+  if (ca > 0) html += `<tr><td>Kalsiyum (glukonat)</td><td>${(ca * kg).toFixed(2)} mmol/gün</td></tr>`;
+  if (mg > 0) html += `<tr><td>Magnezyum (sülfat)</td><td>${(mg * kg).toFixed(2)} mmol/gün</td></tr>`;
+  if (cernevit > 0) html += `<tr><td>Cernevit</td><td>${cernevit.toFixed(1)} mL/gün</td></tr>`;
+  if (tracutil > 0) html += `<tr><td>Tracutil</td><td>${tracutil.toFixed(1)} mL/gün</td></tr>`;
+  html += `</table>`;
+
+  // Glukoz karışımı
   if (kalanHacim > 0) {
     html += `
-      <h5 style="margin-top:16px;">Kalan Sıvı (${kalanHacim.toFixed(0)} mL) için Glukoz Karışımı</h5>
-      <p><b>Günlük glukoz ihtiyacı (hedef GIR'e göre):</b> ${glukozHedef.toFixed(1)} g</p>
-      <p><b>Ortalama hedef konsantrasyon:</b> %${hedefYuzde.toFixed(1)}</p>
+      <h5>Kalan Sıvı (${kalanHacim.toFixed(0)} mL) için Glukoz Karışımı (hedef GIR: ${hedefGIR})</h5>
+      <p>Günlük glukoz ihtiyacı: ${glukozHedef.toFixed(1)} g → Ortalama %${hedefYuzde.toFixed(1)}</p>
     `;
-
     if (combos.length === 0) {
       html += `<p class="warning">⚠️ Bu GIR bu hacimde D5-D10-D20-D30 ile sağlanamaz.</p>`;
     } else {
       combos.forEach(c => {
-        html += `<div class="ok">
-          ${c.ml1.toFixed(0)} mL D${c.d1} + ${c.ml2.toFixed(0)} mL D${c.d2}
-        </div>`;
+        html += `<div class="ok">${c.ml1.toFixed(0)} mL D${c.d1} + ${c.ml2.toFixed(0)} mL D${c.d2}</div>`;
       });
-
       if (bestCombo) {
-        html += `
-          <div class="best">
-            🏆 <b>Periferik dostu en iyi öneri:</b><br>
-            ${bestCombo.ml1.toFixed(0)} mL D${bestCombo.d1} + ${bestCombo.ml2.toFixed(0)} mL D${bestCombo.d2}
-            (max %${bestCombo.maxDex})
-          </div>
-        `;
+        html += `<div class="best">🏆 En iyi (periferik): ${bestCombo.ml1.toFixed(0)} mL D${bestCombo.d1} + ${bestCombo.ml2.toFixed(0)} mL D${bestCombo.d2} (max %${bestCombo.maxDex})</div>`;
       }
     }
-  } else {
-    html += `<p class="warning">Lipid hacmi toplam sıvıyı aştı → glukoz karışımı hesaplanamadı.</p>`;
   }
 
   if (uyari) html += `<div class="warning">${uyari}</div>`;
 
   document.getElementById("sonuc").innerHTML = html;
   document.getElementById("sonuc").style.display = "block";
+}
+
+function kombinasyon(c1, c2, vol, hedef_glukoz) {
+  let g1 = c1 / 100, g2 = c2 / 100;
+  let x = (hedef_glukoz - g2 * vol) / (g1 - g2);
+  if (x < 0 || x > vol) return null;
+  return { d1: c1, ml1: x, d2: c2, ml2: vol - x, maxDex: Math.max(c1, c2) };
 }
 </script>
 
