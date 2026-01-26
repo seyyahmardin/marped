@@ -14,6 +14,7 @@
     button:hover { background: #004d00; }
     #result { margin-top: 20px; padding: 15px; background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 5px; }
     .warning { color: red; font-weight: bold; margin-top: 15px; }
+    .detail { margin: 8px 0; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -46,7 +47,7 @@
       <option value="oseltamivir">Oseltamivir</option>
       <option value="piperasilin">Piperasilin</option>
       <option value="piperasilin-tazobaktam">Piperasilin + Tazobaktam (Piptaz)</option>
-      <option value="sefalosporinler">Sefalosporinler (Sefaklor, Sefaleksin, Sefaperazon vb.)</option>
+      <option value="sefalosporinler">Sefalosporinler (Sefaklor, Sefaleksin vb.)</option>
       <option value="siprofloksasin">Siprofloksasin</option>
       <option value="vankomisin">Vankomisin</option>
     </select>
@@ -69,7 +70,6 @@
       <option value="otit">Akut Otit</option>
       <option value="iye">İdrar Yolu Enfeksiyonu</option>
       <option value="mss">Menenjit / MSS Enfeksiyonu</option>
-      <option value="kistik">Kistik Fibroz / Özel Durum</option>
     </select>
 
     <button onclick="hesapla()">Hesapla</button>
@@ -91,195 +91,199 @@
       }
 
       let dozGunluk = '';
-      let dozTek = '';
+      let dozBasi = '';
+      let yol = '';
+      let infSure = '';
       let dozBolum = '';
       let maxDoz = '';
       let not = 'MNT notlarını kontrol edin.';
 
-      // PDF'den alınan dozlar (sayfa bazlı)
+      // PDF'den alınan dozlar (doz başı, yol, infüzyon süresi eklendi)
       if (ilac === 'amikasin') {
+        yol = 'IV (2 saat infüzyon)';
+        infSure = '2 saat';
         if (yas === 'yenidogan') {
-          if (kilo < 1.2) dozTek = '7.5 mg/kg her 18-24 saatte';
-          else if (kilo < 2) dozTek = '7.5-10 mg/kg her 12-24 saatte';
-          else dozTek = '7.5-10 mg/kg her 8-12 saatte';
+          let dozTekMg = 0;
+          if (kilo < 1.2) dozTekMg = 7.5 * kilo;
+          else if (kilo < 2) dozTekMg = (7.5 + (kilo >= 2 ? 2.5 : 0)) * kilo; // yaklaşımlı
+          else dozTekMg = 10 * kilo;
+          dozBasi = dozTekMg.toFixed(1) + ' mg/doz';
           dozGunluk = '15-30 mg/kg/gün';
+          dozBolum = '2-3x';
           maxDoz = 'Max: 1.5 g/gün';
-          not += ' 2 saat IV inf. Tbc için 15-30 mg/kg/gün.';
+          not += ' Tbc: 15-30 mg/kg/gün.';
         } else {
+          let dozBasiMg = (15 + (kilo * 7.5)) / 2; // örnek ortalama
+          dozBasi = dozBasiMg.toFixed(1) + ' mg/doz';
           dozGunluk = '15-22.5 mg/kg/gün';
           dozBolum = '2x';
         }
       } else if (ilac === 'ampisilin') {
+        yol = 'IV / IM / PO';
+        infSure = 'Yavaş IV (30-60 dk)';
         if (yas === 'yenidogan') {
+          dozBasi = (50 * kilo).toFixed(1) + ' mg/doz (ortalama)';
           dozGunluk = '50-200 mg/kg/gün';
           dozBolum = '2-4x';
           not += ' Grup B Strep Menenjit: 300 mg/kg/gün.';
         } else {
+          dozBasi = (100 * kilo / 4).toFixed(1) + ' mg/doz';
           dozGunluk = '100-200 mg/kg/gün';
           dozBolum = '4x';
           if (enf === 'mss') dozGunluk = '200-400 mg/kg/gün';
         }
       } else if (ilac === 'ampisilin-sulbaktam') {
-        dozGunluk = '100-150 mg/kg/gün (hafif-orta)';
-        if (enf === 'mss') dozGunluk = '200-300 mg/kg/gün';
+        yol = 'IV / IM';
+        infSure = '30-60 dk IV infüzyon';
+        dozBasi = (100 * kilo / 4).toFixed(1) + ' mg/doz';
+        dozGunluk = '100-150 mg/kg/gün';
         dozBolum = '4x';
+        if (enf === 'mss') dozGunluk = '200-300 mg/kg/gün';
       } else if (ilac === 'amoksisilin') {
+        yol = 'PO';
+        infSure = 'Ağızdan';
+        dozBasi = (25 * kilo / 3).toFixed(1) + ' mg/doz';
         dozGunluk = '25-50 mg/kg/gün';
         dozBolum = '2-3x';
-        if (yas === 'yenidogan') dozGunluk = '20-30 mg/kg/gün';
-        if (enf === 'direncli' || enf === 'otit') dozGunluk = '80-100 mg/kg/gün';
+        if (enf === 'direncli' || enf === 'otit') dozBasi = (80 * kilo / 2).toFixed(1) + ' mg/doz';
       } else if (ilac === 'amoksisilin-klav') {
-        dozGunluk = '20-40 mg/kg/gün (<40 kg)';
-        if (enf === 'direncli' || enf === 'otit') dozGunluk = '80-100 mg/kg/gün';
+        yol = 'PO';
+        infSure = 'Ağızdan';
+        dozBasi = (20 * kilo / 2).toFixed(1) + ' mg/doz';
+        dozGunluk = '20-40 mg/kg/gün';
         dozBolum = '2x';
+        if (enf === 'direncli' || enf === 'otit') dozBasi = (80 * kilo / 2).toFixed(1) + ' mg/doz';
       } else if (ilac === 'azitromisin') {
+        yol = 'PO / IV';
+        infSure = 'Ağızdan veya 1 saat IV';
+        dozBasi = (10 * kilo).toFixed(1) + ' mg/doz (3 gün kür)';
         dozGunluk = '10 mg/kg/gün';
-        dozBolum = '1x (3 gün kür)';
+        dozBolum = '1x';
       } else if (ilac === 'bactrim') {
+        yol = 'PO / IV';
+        infSure = '60-90 dk IV';
+        dozBasi = (8 * kilo / 2).toFixed(1) + ' mg TMP/doz';
         dozGunluk = '8-12 mg/kg/gün (TMP)';
         dozBolum = '2x';
-        not += ' İYE: 6-12 mg/kg/gün TMP. Onkoloji prflx: 5 mg/kg/gün TMP.';
       } else if (ilac === 'ertapenem') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '15 mg/kg/gün';
-          dozBolum = '2x';
-          maxDoz = 'Max: 1 g/gün (3 ay-12 yaş)';
-        } else {
-          dozGunluk = '1 g/gün';
-          dozBolum = '1x (≥13 yaş)';
-        }
+        yol = 'IV';
+        infSure = '30 dk infüzyon';
+        dozBasi = (15 * kilo).toFixed(1) + ' mg/doz';
+        dozGunluk = '15 mg/kg/gün (yenidoğan)';
+        dozBolum = '2x';
       } else if (ilac === 'flukonazol') {
-        if (yas === 'yenidogan') {
-          // Yenidoğan tabloya göre hafta/gün bazlı
-          dozGunluk = '3-12 mg/kg/gün (enfeksiyona göre yükleme/idame)';
-          not += ' Yükleme 6-12 mg/kg, idame 3-12 mg/kg. Kriptokokal: 12 mg/kg yükleme.';
-        } else {
-          dozGunluk = '3-12 mg/kg/gün';
-          maxDoz = 'Max: 12 mg/kg/gün';
-        }
+        yol = 'IV / PO';
+        infSure = 'Yavaş IV (30-60 dk)';
+        dozBasi = (6 * kilo).toFixed(1) + ' mg/doz (yükleme)';
+        dozGunluk = '3-12 mg/kg/gün';
+        dozBolum = '1x';
       } else if (ilac === 'gansiklovir') {
+        yol = 'IV';
+        infSure = '1 saat infüzyon';
+        dozBasi = (5 * kilo).toFixed(1) + ' mg/doz';
         dozGunluk = '10 mg/kg/gün';
-        dozBolum = '2x (indüksiyon 14-21 gün, idame 5 mg/kg 1x)';
-        not += ' Kong. CMV: 10 mg/kg/gün 6 hafta. KC transplant: 10 mg/kg/gün 7-14 gün.';
+        dozBolum = '2x';
       } else if (ilac === 'gentamisin') {
-        if (yas === 'yenidogan') {
-          // Yenidoğan tablo
-          if (kilo < 1.2) dozTek = '2.5 mg/kg her 18-24 saatte';
-          else dozTek = '2.5-5 mg/kg her 12-48 saatte (hafta/gün bazlı)';
-          dozGunluk = '5-7.5 mg/kg/gün';
-        } else {
-          dozGunluk = '7.5 mg/kg/gün';
-          dozBolum = '1-2x';
-        }
+        yol = 'IV / IM';
+        infSure = '30-60 dk IV';
+        dozBasi = (5 * kilo).toFixed(1) + ' mg/doz';
+        dozGunluk = '5-7.5 mg/kg/gün';
+        dozBolum = '1-2x';
       } else if (ilac === 'imipenem-silastatin') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '20-25 mg/kg/gün';
-          dozBolum = '2-3x';
-        } else {
-          dozGunluk = '60-100 mg/kg/gün';
-          dozBolum = '3-4x';
-          maxDoz = 'Max: 4 g/gün';
-        }
+        yol = 'IV';
+        infSure = '30-60 dk infüzyon';
+        dozBasi = (20 * kilo / 3).toFixed(1) + ' mg/doz';
+        dozGunluk = '60-100 mg/kg/gün';
+        dozBolum = '3-4x';
       } else if (ilac === 'klindamisin') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '10-30 mg/kg/gün';
-          dozBolum = '2-4x';
-        } else {
-          dozGunluk = '25-40 mg/kg/gün (IV/IM)';
-          dozBolum = '3x';
-          maxDoz = 'Max: 4.8 g/gün';
-        }
+        yol = 'IV / PO / IM';
+        infSure = '30-60 dk IV';
+        dozBasi = (10 * kilo / 3).toFixed(1) + ' mg/doz';
+        dozGunluk = '25-40 mg/kg/gün';
+        dozBolum = '3x';
       } else if (ilac === 'levofloksasin') {
+        yol = 'PO / IV';
+        infSure = '60 dk IV';
+        dozBasi = (10 * kilo).toFixed(1) + ' mg/doz';
         dozGunluk = '10 mg/kg/gün';
         dozBolum = '1-2x';
-        maxDoz = 'Max: 500 mg/gün (6 ay-5 yaş 2x, ≥5 yaş 1x)';
       } else if (ilac === 'linezolid') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '20-30 mg/kg/gün';
-          dozBolum = '2-3x';
-        } else {
-          dozGunluk = '30 mg/kg/gün (1 ay-11 yaş)';
-          dozBolum = '3x';
-          not += ' ≥12 yaş: 600 mg 2x.';
-        }
-      } else if (ilac === 'meropenem') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '20-40 mg/kg/gün';
-          dozBolum = '2-3x';
-        } else {
-          dozGunluk = '30-120 mg/kg/gün';
-          dozBolum = '3x';
-          maxDoz = 'Max: 6 g/gün (menenjit/Pseudomonas)';
-        }
-      } else if (ilac === 'metronidazol') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '15-30 mg/kg/gün';
-          dozBolum = '2x';
-        } else {
-          dozGunluk = '30 mg/kg/gün';
-          dozBolum = '4x';
-          maxDoz = 'Max: 4 g/gün';
-          not += ' Amebiyazis: 35-50 mg/kg/gün 3x.';
-        }
-      } else if (ilac === 'nitrofurantoin') {
-        dozGunluk = '5-7 mg/kg/gün';
-        dozBolum = '2x';
-        maxDoz = 'Max: 400 mg/gün';
-        not += ' Profilaksi: 1-2 mg/kg/gün 1x.';
-      } else if (ilac === 'ornidazol') {
+        yol = 'IV / PO';
+        infSure = '30-120 dk IV';
+        dozBasi = (10 * kilo).toFixed(1) + ' mg/doz';
         dozGunluk = '30 mg/kg/gün';
         dozBolum = '3x';
-        maxDoz = 'Max: 1.5 g/gün';
+      } else if (ilac === 'meropenem') {
+        yol = 'IV';
+        infSure = '15-30 dk infüzyon';
+        dozBasi = (20 * kilo / 3).toFixed(1) + ' mg/doz';
+        dozGunluk = '30-120 mg/kg/gün';
+        dozBolum = '3x';
+      } else if (ilac === 'metronidazol') {
+        yol = 'IV / PO';
+        infSure = '30-60 dk IV';
+        dozBasi = (7.5 * kilo).toFixed(1) + ' mg/doz';
+        dozGunluk = '30 mg/kg/gün';
+        dozBolum = '4x';
+      } else if (ilac === 'nitrofurantoin') {
+        yol = 'PO';
+        infSure = 'Ağızdan';
+        dozBasi = (3 * kilo).toFixed(1) + ' mg/doz';
+        dozGunluk = '5-7 mg/kg/gün';
+        dozBolum = '2x';
+      } else if (ilac === 'ornidazol') {
+        yol = 'PO / IV';
+        infSure = '30 dk IV';
+        dozBasi = (10 * kilo).toFixed(1) + ' mg/doz';
+        dozGunluk = '30 mg/kg/gün';
+        dozBolum = '3x';
       } else if (ilac === 'oseltamivir') {
-        // Kilo/yaş tabloya göre
-        if (kilo < 15) dozGunluk = '30-60 mg/gün (2x)';
-        else if (kilo < 23) dozGunluk = '45-90 mg/gün (2x)';
-        else if (kilo < 40) dozGunluk = '60-120 mg/gün (2x)';
-        else dozGunluk = '150 mg/gün (2x)';
-        not += ' 5 gün tedavi, 10 gün profilaksi. Yaş/kilo tabloya bakın.';
+        yol = 'PO';
+        infSure = 'Ağızdan';
+        let dozBasiMg = kilo < 15 ? 30 : kilo < 23 ? 45 : kilo < 40 ? 60 : 75;
+        dozBasi = dozBasiMg + ' mg/doz (2x)';
+        dozGunluk = '60-150 mg/gün';
+        dozBolum = '2x';
       } else if (ilac === 'piperasilin') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '100-200 mg/kg/gün';
-          dozBolum = '3-4x';
-        } else {
-          dozGunluk = '200-300 mg/kg/gün';
-          dozBolum = '4x';
-        }
+        yol = 'IV';
+        infSure = '30-60 dk';
+        dozBasi = (50 * kilo / 4).toFixed(1) + ' mg/doz';
+        dozGunluk = '200-300 mg/kg/gün';
+        dozBolum = '4x';
       } else if (ilac === 'piperasilin-tazobaktam') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '150-300 mg/kg/gün';
-          dozBolum = '3-4x';
-        } else {
-          dozGunluk = '240-400 mg/kg/gün';
-          dozBolum = '3x';
-          maxDoz = 'Max: 18 g/gün';
-        }
+        yol = 'IV';
+        infSure = '30 dk';
+        dozBasi = (80 * kilo / 3).toFixed(1) + ' mg/doz';
+        dozGunluk = '240-400 mg/kg/gün';
+        dozBolum = '3x';
       } else if (ilac === 'sefalosporinler') {
-        dozGunluk = '50-200 mg/kg/gün (ilaç tipine göre)';
-        not += ' Sefaleksin: 25-100 mg/kg/gün. Seftriakson: 50-100 mg/kg/gün 1-2x. Detaylı PDF bakın.';
+        yol = 'IV / PO / IM';
+        infSure = '30-60 dk IV';
+        dozBasi = (50 * kilo / 2).toFixed(1) + ' mg/doz (ortalama)';
+        dozGunluk = '50-200 mg/kg/gün';
+        not += ' Detay ilaç tipine göre değişir (Seftriakson 50-100 mg/kg/gün 1-2x).';
       } else if (ilac === 'siprofloksasin') {
+        yol = 'PO / IV';
+        infSure = '60 dk IV';
+        dozBasi = (10 * kilo).toFixed(1) + ' mg/doz';
         dozGunluk = '20-30 mg/kg/gün';
         dozBolum = '2x';
-        maxDoz = 'Max: 1.5 g/gün PO, 800 mg IV';
-        not += ' Kistik Fibroz: 40 mg/kg/gün.';
       } else if (ilac === 'vankomisin') {
-        if (yas === 'yenidogan') {
-          dozGunluk = '15-20 mg/kg/gün';
-          dozBolum = '1-3x';
-        } else {
-          dozGunluk = '40-60 mg/kg/gün';
-          dozBolum = '4x';
-          maxDoz = 'Max: 1 g/doz';
-          not += ' MSS: 40-60 mg/kg/gün.';
-        }
+        yol = 'IV';
+        infSure = '60 dk infüzyon';
+        dozBasi = (15 * kilo / 4).toFixed(1) + ' mg/doz';
+        dozGunluk = '40-60 mg/kg/gün';
+        dozBolum = '4x';
       }
 
       let sonuc = `<h3>${ilac.toUpperCase()} Doz Önerisi (${kilo} kg)</h3>`;
-      sonuc += `<p><strong>Günlük toplam doz:</strong> ${dozGunluk}</p>`;
-      if (dozTek) sonuc += `<p><strong>Tek doz:</strong> ${dozTek}</p>`;
-      if (dozBolum) sonuc += `<p><strong>Bölüm:</strong> ${dozBolum}</p>`;
-      if (maxDoz) sonuc += `<p><strong>Max doz:</strong> ${maxDoz}</p>`;
-      if (not) sonuc += `<p><strong>Not:</strong> ${not}</p>`;
+      sonuc += `<p class="detail">Günlük toplam doz: ${dozGunluk}</p>`;
+      sonuc += `<p class="detail">Doz başı: ${dozBasi}</p>`;
+      sonuc += `<p class="detail">Veriliş yolu: ${yol}</p>`;
+      sonuc += `<p class="detail">İnfüzyon süresi: ${infSure}</p>`;
+      if (dozBolum) sonuc += `<p class="detail">Bölüm: ${dozBolum}</p>`;
+      if (maxDoz) sonuc += `<p class="detail">Max doz: ${maxDoz}</p>`;
+      if (not) sonuc += `<p class="detail">Not: ${not}</p>`;
       sonuc += '<p class="warning">Referans amaçlı. Klinik karar hekime aittir. MNT notlarını kontrol edin.</p>';
 
       document.getElementById('result').innerHTML = sonuc;
