@@ -2,73 +2,53 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>MARPED – GIR Glukoz Hesabı</title>
+<title>MARPED – GIR → Glukoz Karışımı</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-body{font-family:Arial;background:#f4f6f8;margin:0}
+body{font-family:Arial;background:#f4f6f8;margin:0;padding-bottom:70px}
 header{background:#6f42c1;color:white;padding:15px;text-align:center}
-.container{padding:20px;max-width:540px;margin:auto}
+.container{padding:20px;max-width:520px;margin:auto}
 .card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
 input,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
 button{background:#6f42c1;color:white;border:none;border-radius:8px}
 .result{margin-top:15px;font-size:15px}
 .ok{color:#146c43;font-weight:bold}
-.bad{color:#b02a37;font-weight:bold}
+.warn{color:#b02a37;font-weight:bold}
+.best{background:#e9f7ef;padding:10px;border-radius:8px;margin-top:10px}
 small{color:#666}
+
+/* Alt Menü */
+.bottom-menu{
+  position:fixed; bottom:0; left:0; width:100%;
+  background:#6f42c1; display:flex; justify-content:space-around;
+  padding:8px 0; z-index:1000;
+}
+.bottom-menu a{
+  color:white; text-decoration:none; font-size:14px; text-align:center; flex:1;
+}
+.bottom-menu span{font-size:12px}
 </style>
 </head>
-<style>
-.bottom-menu{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:#6f42c1;
-  display:flex;
-  justify-content:space-around;
-  padding:8px 0;
-  z-index:1000;
-}
-
-.bottom-menu a{
-  color:white;
-  text-decoration:none;
-  font-size:14px;
-  text-align:center;
-  flex:1;
-}
-
-.bottom-menu span{
-  font-size:12px;
-}
-body{
-  padding-bottom:70px; /* menü içeriği kapatmasın diye */
-}
-</style>
 
 <body>
-<div class="menu-bar">
-  <a href="index.html" class="menu-button">
-    🏠 Ana Menü
-  </a>
-</div>
 
 <header>
 <h2>GIR → Glukoz Karışımı</h2>
-<p>D5 – D10 – D20 – D30</p>
+<p>D5–D10–D20–D30 (Miz Mayi)</p>
 </header>
 
 <div class="container">
 <div class="card">
 
 <label>Kilo (kg)</label>
-<input type="number" id="kg" placeholder="10">
+<input type="number" id="kg" value="10">
 
 <label>Hedef GIR (mg/kg/dk)</label>
-<input type="number" id="gir" placeholder="6">
+<input type="number" id="gir" value="5">
 
 <label>Toplam sıvı (ml/gün)</label>
-<input type="number" id="vol" placeholder="200">
+<input type="number" id="vol" value="800">
 
 <button onclick="hesapla()">Hesapla</button>
 
@@ -78,59 +58,80 @@ body{
 </div>
 
 <script>
-function satir(dex, vol, glukoz){
-  let g_per_ml = dex / 100;
-  let max_g = vol * g_per_ml;
+function kombinasyon(c1, c2, vol, hedef_g){
+  let g1 = c1/100, g2 = c2/100;
+  let x = (hedef_g - g2*vol) / (g1 - g2);
 
-  if(max_g < glukoz){
-    return `<div class="bad">❌ D${dex}: yetersiz (maks ${max_g.toFixed(1)} g)</div>`;
-  }
+  if(x < 0 || x > vol) return null;
 
-  let ml_dex = glukoz / g_per_ml;
-  let ml_d5 = vol - ml_dex;
-
-  if(ml_d5 < 0) return "";
-
-  return `<div class="ok">
-  ✅ ${ml_dex.toFixed(0)} ml D${dex} + ${ml_d5.toFixed(0)} ml D5
-  </div>`;
+  return {
+    d1: c1, ml1: x,
+    d2: c2, ml2: vol - x,
+    maxDex: Math.max(c1, c2)
+  };
 }
 
 function hesapla(){
-  let kg = +document.getElementById("kg").value;
-  let gir = +document.getElementById("gir").value;
-  let vol = +document.getElementById("vol").value;
+  let kg = +kgInput.value;
+  let gir = +girInput.value;
+  let vol = +volInput.value;
 
-  if(kg<=0 || gir<=0 || vol<=0){
-    sonuc.innerHTML="Lütfen tüm alanları doldurun.";
+  if(kg<=0||gir<=0||vol<=0){
+    sonuc.innerHTML="Tüm alanları doldurun.";
     return;
   }
 
   let glukoz = gir * kg * 1440 / 1000;
+  let hedef_yuzde = (glukoz / vol) * 100;
 
-  sonuc.innerHTML = `
-  <b>Günlük gerekli glukoz:</b> ${glukoz.toFixed(1)} g<br><br>
-  ${satir(30,vol,glukoz)}
-  ${satir(20,vol,glukoz)}
-  ${satir(10,vol,glukoz)}
-  ${satir(5,vol,glukoz)}
+  let combos = [
+    kombinasyon(10,5,vol,glukoz),
+    kombinasyon(20,10,vol,glukoz),
+    kombinasyon(30,20,vol,glukoz)
+  ].filter(x=>x);
+
+  if(combos.length==0){
+    sonuc.innerHTML="<span class='warn'>⚠️ Bu GIR bu hacimde sağlanamaz.</span>";
+    return;
+  }
+
+  let best = combos.reduce((a,b)=>a.maxDex<b.maxDex?a:b);
+
+  let html = `
+  <b>Günlük glukoz:</b> ${glukoz.toFixed(1)} g<br>
+  <b>Hedef ortalama konsantrasyon:</b> %${hedef_yuzde.toFixed(1)}<br><br>
+  `;
+
+  combos.forEach(c=>{
+    html += `<div class="ok">
+    ${c.ml1.toFixed(0)} ml D${c.d1} + ${c.ml2.toFixed(0)} ml D${c.d2}
+    </div>`;
+  });
+
+  html += `
+  <div class="best">
+  🏆 <b>Periferik dostu öneri:</b><br>
+  ${best.ml1.toFixed(0)} ml D${best.d1} + ${best.ml2.toFixed(0)} ml D${best.d2}
+  </div>
   <br>
   <small>
-  ⚠️ Toplam hacim yalnızca glukozlu sıvılarla doldurulur.<br>
+  Tüm hacim glukozludur. Toplam glukoz hedef GIR’i TAM karşılar.<br>
   Nihai sorumluluk klinisyene aittir.
-  </small>`;
+  </small>
+  `;
+
+  sonuc.innerHTML = html;
 }
+
+const kgInput = document.getElementById("kg");
+const girInput = document.getElementById("gir");
+const volInput = document.getElementById("vol");
 </script>
+
 <div class="bottom-menu">
-  <a href="index.html">
-    🏠<br><span>Ana Menü</span>
-  </a>
-  <a href="gir.html">
-    🧮<br><span>Hesap</span>
-  </a>
-  <a href="fizikmuayene.html">
-    📝<br><span>Notlar</span>
-  </a>
+  <a href="index.html">🏠<br><span>Ana Menü</span></a>
+  <a href="gir.html">🧮<br><span>Hesap</span></a>
+  <a href="fizikmuayene.html">📝<br><span>Notlar</span></a>
 </div>
 
 </body>
