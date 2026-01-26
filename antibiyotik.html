@@ -1,260 +1,137 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>Pediyatrik Antibiyotik Doz Hesaplama</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f2f8ff;
-  margin: 0;
-}
-.container {
-  max-width: 600px;
-  background: #fff;
-  margin: 30px auto;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-}
-h1 {
-  text-align: center;
-  color: #0077cc;
-}
-label {
-  display: block;
-  margin-top: 15px;
-  font-weight: bold;
-}
-input, select, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  font-size: 16px;
-}
-button {
-  background: #4facfe;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  margin-top: 20px;
-}
-button:hover {
-  background: #0077cc;
-}
-.result {
-  margin-top: 20px;
-  padding: 15px;
-  background: #eaf2fb;
-  border-left: 5px solid #4facfe;
-  border-radius: 10px;
-}
-.warning {
-  margin-top: 20px;
-  background: #fff3cd;
-  padding: 12px;
-  border-left: 5px solid #ff9800;
-  border-radius: 10px;
-  font-size: 13px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MARPED – Antibiyotik Doz Hesaplama</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 15px; background: #f8f9fa; }
+    h1 { color: #006400; text-align: center; }
+    .container { max-width: 600px; margin: auto; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    label { display: block; margin: 10px 0 5px; font-weight: bold; }
+    input, select { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+    button { background: #006400; color: white; padding: 10px; border: none; width: 100%; cursor: pointer; font-size: 16px; }
+    button:hover { background: #004d00; }
+    #result { margin-top: 20px; padding: 15px; background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 5px; }
+    .warning { color: red; font-weight: bold; margin-top: 15px; }
+  </style>
 </head>
-
 <body>
+  <div class="container">
+    <h1>MARPED – Antibiyotik Doz Hesaplama</h1>
+    <p>PDF: "Pediatri İlaç Dozları" (Dr. M. Nur TALAY) kaynaklı dozlar. <strong>Kontrol ederek uygulayınız!</strong> Renal/hepatik yetmezlikte doz ayarlayınız.</p>
 
-<div class="container">
-<h1>Antibiyotik Doz Hesaplama</h1>
+    <label for="ilac">Antibiyotik Seçiniz:</label>
+    <select id="ilac">
+      <option value="">Seçiniz...</option>
+      <option value="amikasin">Amikasin</option>
+      <option value="ampisilin">Ampisilin</option>
+      <option value="ampisilin-sulbaktam">Ampisilin Sülbaktam</option>
+      <option value="amoksisilin">Amoksisilin</option>
+      <option value="amoksisilin-klav">Amoksisilin + Klavulanik Asit</option>
+    </select>
 
-<label>Antibiyotik</label>
-<select id="antibiotic">
-  <option value="">Seçiniz</option>
-  <option value="amoksisilin">Amoksisilin</option>
-  <option value="ampisilin">Ampisilin</option>
-  <option value="sefotaksim">Sefotaksim</option>
-  <option value="seftriakson">Seftriakson</option>
-  <option value="vankomisin">Vankomisin</option>
-</select>
+    <label for="kilo">Vücut Ağırlığı (kg):</label>
+    <input type="number" id="kilo" min="0.5" step="0.1" placeholder="Örn: 5.2">
 
-<label>Yaş Grubu</label>
-<select id="age">
-  <option value="">Seçiniz</option>
-  <option value="yenidogan">Yenidoğan</option>
-  <option value="bebek">Bebek (1-12 ay)</option>
-  <option value="cocuk">Çocuk</option>
-</select>
+    <label for="yas">Yaş Grubu:</label>
+    <select id="yas">
+      <option value="">Seçiniz...</option>
+      <option value="yenidogan">Yenidoğan (0-28 gün)</option>
+      <option value="bebek">Bebek/Çocuk (1 ay - 12 yaş)</option>
+      <option value="otit">Otit / Dirençli Pnömoni (özel doz)</option>
+    </select>
 
-<label>Kilo (kg)</label>
-<input type="number" id="weight" placeholder="Örn: 12">
+    <label for="enfeksiyon">Enfeksiyon Tipi (isteğe bağlı):</label>
+    <select id="enfeksiyon">
+      <option value="standart">Standart / Hafif</option>
+      <option value="direncli">Dirençli S. pneumoniae (80-100 mg/kg)</option>
+      <option value="otit">Akut Otit (80-90 mg/kg)</option>
+      <option value="iye">İdrar Yolu Enfeksiyonu</option>
+      <option value="mss">MSS Enfeksiyonu / Menenjit</option>
+      <option value="tbc">Tüberküloz</option>
+    </select>
 
-<label>Doz Bölme (günde)</label>
-<select id="split">
-  <option value="2">2 x</option>
-  <option value="3">3 x</option>
-  <option value="4">4 x</option>
-</select>
+    <button onclick="hesapla()">Hesapla</button>
 
-<button onclick="calculate()">Hesapla</button>
+    <div id="result"></div>
+    <div class="warning">Uyarı: Bu araç sadece referanstır. Klinik karar hekime aittir. PDF'deki tüm uyarıları okuyunuz.</div>
+  </div>
 
-<div class="result" id="result"></div>
-
-<div class="warning">
-⚠️ Bu hesaplama bilgilendirme amaçlıdır. Klinik karar yerine geçmez.
-</div>
-
-</div>
-
-<script>
   <script>
-const TND_ANTIBIYOTIKLER = {
+    function hesapla() {
+      const ilac = document.getElementById('ilac').value;
+      const kilo = parseFloat(document.getElementById('kilo').value);
+      const yas = document.getElementById('yas').value;
+      const enf = document.getElementById('enfeksiyon').value;
 
-  ampisilin: {
-    ad: "Ampisilin",
-    yol: "IV / IM",
-    endikasyon: {
-      sepsis: [
-        { ghMax: 34, gunMax: 7, doz: "50 mg/kg/doz", aralik: "12 saatte bir" },
-        { ghMax: 34, gunMin: 8, doz: "75 mg/kg/doz", aralik: "12 saatte bir" },
-        { ghMin: 35, gunMax: 28, doz: "50 mg/kg/doz", aralik: "8 saatte bir" }
-      ],
-      menenjit: [
-        { ghMax: 34, gunMax: 7, doz: "100 mg/kg/doz", aralik: "8 saatte bir" },
-        { ghMax: 34, gunMin: 8, doz: "75 mg/kg/doz", aralik: "6 saatte bir" },
-        { ghMin: 35, gunMax: 28, doz: "100 mg/kg/doz", aralik: "8 saatte bir" }
-      ]
+      if (!ilac || !kilo || !yas) {
+        document.getElementById('result').innerHTML = '<p style="color:red;">Lütfen tüm gerekli alanları doldurunuz!</p>';
+        return;
+      }
+
+      let dozGunluk = '';
+      let dozTek = '';
+      let dozBolum = '';
+      let maxDoz = '';
+      let not = '';
+
+      if (ilac === 'amikasin') {
+        if (yas === 'yenidogan') {
+          // PDF page 5 tabloya göre basitleştirilmiş
+          if (kilo < 1.2) dozTek = '7.5 mg/kg her 18-24 saatte';
+          else if (kilo < 2) dozTek = '7.5 mg/kg her 12-24 saatte';
+          else dozTek = '7.5-10 mg/kg her 8-12 saatte';
+          dozGunluk = '15-30 mg/kg/gün';
+          maxDoz = 'Max: 1.5 g/gün';
+          not = '2 saat IV infüzyon. Tbc için 15-30 mg/kg/gün.';
+        } else {
+          dozGunluk = '15-22.5 mg/kg/gün';
+          dozBolum = '2 kez';
+          not = 'İYE: 15 mg/kg/gün tek doz. Tbc: 15-30 mg/kg/gün.';
+        }
+      } else if (ilac === 'ampisilin') {
+        if (yas === 'yenidogan') {
+          // PDF page 6 tablo
+          if (kilo < 1.2) dozTek = '25-50 mg/kg her 12 saatte';
+          else dozTek = '25-50 mg/kg her 8-6 saatte (gün sayısı artınca)';
+          dozGunluk = 'Grup B Strep Menenjit: 300 mg/kg/gün';
+        } else {
+          dozGunluk = '100-200 mg/kg/gün';
+          dozBolum = '4 kez';
+          if (enf === 'mss') dozGunluk = '200-400 mg/kg/gün (Menenjit/MSS)';
+        }
+      } else if (ilac === 'ampisilin-sulbaktam') {
+        dozGunluk = '100-150 mg/kg/gün (hafif-orta enf.)';
+        if (enf === 'mss') dozGunluk = '200-300 mg/kg/gün';
+        dozBolum = '4 kez';
+        not = 'Ampisiline göre doz ayarlanır. Ayaktan: 10 kg altına 250 mg flk 2x1, üstüne 500 mg 2x1.';
+      } else if (ilac === 'amoksisilin') {
+        dozGunluk = '25-50 mg/kg/gün';
+        dozBolum = '2-3 kez';
+        if (yas === 'yenidogan' || kilo < 3) dozGunluk = '20-30 mg/kg/gün';
+        if (enf === 'direncli') dozGunluk = '80-100 mg/kg/gün (4 ay-4 yaş)';
+        if (enf === 'otit') dozGunluk = '80-90 mg/kg/gün';
+        if (enf === 'iye') dozGunluk = '20-40 mg/kg/gün 3 kez';
+        not = 'İYE profilaksi: 10 mg/kg gece tek doz.';
+      } else if (ilac === 'amoksisilin-klav') {
+        dozGunluk = '20-40 mg/kg/gün (<40 kg)';
+        if (enf === 'direncli') dozGunluk = '80-100 mg/kg/gün';
+        if (enf === 'otit') dozGunluk = '80-90 mg/kg/gün';
+        dozBolum = '2 kez';
+        not = 'Amoksisiline göre ayarlanır. Augmentin-S 600: <40 kg 90 mg/kg/gün 2 kez.';
+      }
+
+      let sonuc = `<h3>${ilac.toUpperCase()} Doz Önerisi (${kilo} kg)</h3>`;
+      sonuc += `<p><strong>Günlük toplam doz:</strong> ${dozGunluk}</p>`;
+      if (dozTek) sonuc += `<p><strong>Tek doz:</strong> ${dozTek}</p>`;
+      if (dozBolum) sonuc += `<p><strong>Bölüm:</strong> ${dozBolum}</p>`;
+      if (maxDoz) sonuc += `<p><strong>Max doz:</strong> ${maxDoz}</p>`;
+      if (not) sonuc += `<p><strong>Not:</strong> ${not}</p>`;
+      sonuc += '<p class="warning">Bu hesaplama referanstır. Klinik karar hekime aittir. PDF kontrol edin.</p>';
+
+      document.getElementById('result').innerHTML = sonuc;
     }
-  },
-
-  gentamisin: {
-    ad: "Gentamisin",
-    yol: "IV / IM",
-    endikasyon: {
-      sepsis: [
-        { ghMax: 29, gunMax: 7, doz: "5 mg/kg/doz", aralik: "48 saatte bir" },
-        { ghMax: 29, gunMin: 8, doz: "4 mg/kg/doz", aralik: "36 saatte bir" },
-        { ghMin: 30, ghMax: 34, gunMax: 7, doz: "4.5 mg/kg/doz", aralik: "36 saatte bir" },
-        { ghMin: 35, doz: "4 mg/kg/doz", aralik: "24 saatte bir" }
-      ]
-    }
-  },
-
-  amikasin: {
-    ad: "Amikasin",
-    yol: "IV / IM",
-    endikasyon: {
-      sepsis: [
-        { ghMax: 29, gunMax: 7, doz: "14 mg/kg/doz", aralik: "48 saatte bir" },
-        { ghMax: 29, gunMin: 8, doz: "12 mg/kg/doz", aralik: "36 saatte bir" },
-        { ghMin: 30, ghMax: 34, doz: "12 mg/kg/doz", aralik: "24–36 saatte bir" },
-        { ghMin: 35, doz: "12 mg/kg/doz", aralik: "24 saatte bir" }
-      ]
-    }
-  },
-
-  sefotaksim: {
-    ad: "Sefotaksim",
-    yol: "IV / IM",
-    endikasyon: {
-      sepsis: [
-        { ghMin: 32, gunMin: 7, doz: "50 mg/kg/doz", aralik: "6–8 saatte bir" },
-        { ghMax: 31, gunMin: 7, doz: "50 mg/kg/doz", aralik: "8 saatte bir" }
-      ],
-      menenjit: [
-        { gunMax: 7, doz: "100–150 mg/kg/gün", aralik: "8–12 saatte bir" },
-        { gunMin: 8, doz: "150–200 mg/kg/gün", aralik: "6–8 saatte bir" }
-      ]
-    }
-  },
-
-  seftriakson: {
-    ad: "Seftriakson",
-    yol: "IV",
-    endikasyon: {
-      sepsis: [
-        { doz: "50–75 mg/kg/gün", aralik: "24 saatte bir" }
-      ]
-    }
-  },
-
-  vankomisin: {
-    ad: "Vankomisin",
-    yol: "IV",
-    endikasyon: {
-      sepsis: [
-        { ghMax: 29, gunMax: 14, doz: "10 mg/kg/doz", aralik: "18 saatte bir" },
-        { ghMin: 30, doz: "10 mg/kg/doz", aralik: "12 saatte bir" }
-      ],
-      menenjit: [
-        { doz: "15 mg/kg/doz", aralik: "8–12 saatte bir" }
-      ]
-    }
-  },
-
-  meropenem: {
-    ad: "Meropenem",
-    yol: "IV",
-    endikasyon: {
-      sepsis: [
-        { ghMax: 31, gunMax: 14, doz: "20 mg/kg/doz", aralik: "12 saatte bir" },
-        { ghMin: 32, gunMin: 15, doz: "30 mg/kg/doz", aralik: "8 saatte bir" }
-      ],
-      menenjit: [
-        { doz: "40 mg/kg/doz", aralik: "8 saatte bir" }
-      ]
-    }
-  },
-
-  flukonazol: {
-    ad: "Flukonazol",
-    yol: "IV / PO",
-    endikasyon: {
-      tedavi: [
-        { ghMax: 29, doz: "Yükleme 12–25 mg/kg, idame 6–12 mg/kg", aralik: "24–48 saatte bir" }
-      ],
-      profilaksi: [
-        { doz: "3–6 mg/kg/doz", aralik: "Haftada 2 kez" }
-      ]
-    }
-  }
-
-};
-</script>
-
-function calculate() {
-  const ab = document.getElementById("antibiotic").value;
-  const age = document.getElementById("age").value;
-  const weight = parseFloat(document.getElementById("weight").value);
-  const split = parseInt(document.getElementById("split").value);
-  const res = document.getElementById("result");
-
-  if (!ab || !age || !weight || weight <= 0) {
-    res.innerHTML = "Lütfen tüm alanları doldurunuz.";
-    return;
-  }
-
-  // mg/kg/gün – örnek klinik referans aralıkları
-  const doseTable = {
-    amoksisilin: { yenidogan: 30, bebek: 40, cocuk: 50 },
-    ampisilin: { yenidogan: 40, bebek: 50, cocuk: 60 },
-    sefotaksim: { yenidogan: 100, bebek: 150, cocuk: 150 },
-    seftriakson: { yenidogan: 50, bebek: 75, cocuk: 75 },
-    vankomisin: { yenidogan: 30, bebek: 40, cocuk: 40 }
-  };
-
-  const mgKgDay = doseTable[ab][age];
-  const totalDaily = mgKgDay * weight;
-  const singleDose = totalDaily / split;
-
-  res.innerHTML = `
-    <strong>Sonuç</strong><br><br>
-    🔹 <strong>${mgKgDay} mg/kg/gün</strong><br>
-    🔹 <strong>Toplam günlük doz:</strong> ${totalDaily.toFixed(0)} mg<br>
-    🔹 <strong>Doz bölme:</strong> günde ${split} x<br>
-    🔹 <strong>Tek doz:</strong> ${singleDose.toFixed(0)} mg
-  `;
-}
-</script>
-
+  </script>
 </body>
 </html>
