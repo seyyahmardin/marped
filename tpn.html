@@ -6,10 +6,10 @@
   <title>MARPED – TPN Hesaplama</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacOSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #f4f6f8;
       margin: 0;
-      padding-bottom: 80px;
+      padding-bottom: 90px;
       color: #333;
     }
     header {
@@ -46,23 +46,26 @@
     button {
       width: 100%;
       padding: 12px;
-      margin-top: 20px;
+      margin: 12px 0 8px;
       background: #6f42c1;
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       cursor: pointer;
     }
-    button:hover {
-      background: #5a32a3;
+    button:hover { background: #5a32a3; }
+    #kopyalaBtn {
+      background: #28a745;
     }
+    #kopyalaBtn:hover { background: #218838; }
     .result {
-      margin-top: 24px;
+      margin-top: 20px;
       background: #f0f8ff;
       border: 1px solid #b3d4fc;
       border-radius: 8px;
       padding: 16px;
+      display: none;
     }
     .result table {
       width: 100%;
@@ -74,7 +77,7 @@
     }
     .result td:first-child {
       font-weight: 600;
-      width: 55%;
+      width: 58%;
     }
     .warning {
       color: #c0392b;
@@ -84,7 +87,7 @@
     .note {
       font-size: 0.85rem;
       color: #555;
-      margin-top: 16px;
+      margin-top: 20px;
       line-height: 1.4;
     }
     .bottom-menu {
@@ -122,7 +125,7 @@
   <div class="card">
 
     <label>Hasta grubu</label>
-    <select id="grup">
+    <select id="grup" onchange="otomatikDoldur()">
       <option value="">Seçiniz</option>
       <option value="yenidogan">Yenidoğan / Prematüre</option>
       <option value="cocuk">Çocuk (1 ay – 10 yaş)</option>
@@ -130,7 +133,7 @@
     </select>
 
     <label>Kilo (kg)</label>
-    <input type="number" id="kg" step="0.01" min="0.4" placeholder="Örn: 3.45">
+    <input type="number" id="kg" step="0.01" min="0.4" placeholder="Örn: 1.25">
 
     <label>Toplam sıvı hedefi (mL/kg/gün)</label>
     <input type="number" id="sivi" step="1" value="100" min="60" max="160">
@@ -146,18 +149,36 @@
 
     <button onclick="hesaplaTPN()">Hesapla</button>
 
-    <div class="result" id="sonuc" style="display:none;"></div>
+    <div class="result" id="sonuc"></div>
+    <button id="kopyalaBtn" style="display:none;" onclick="kopyalaSonuc()">Sonuçları Kopyala</button>
 
   </div>
 
   <div class="note">
-    ⚠️ Bu değerler başlangıç önerisidir.<br>
-    Elektrolit, mineral, karaciğer/böbrek fonksiyonu, sepsis, refeeding riski gibi klinik duruma göre ayarlanmalıdır.<br>
-    Hesaplamalar ESPGHAN/ESPEN önerilerine dayanır. Nihai karar hekime aittir.
+    ⚠️ Başlangıç değerleri ESPGHAN/ESPEN 2018 + güncel yorumlar ve Türk Neonatoloji Derneği yaklaşımlarına göre.<br>
+    Lipid %20 solüsyon, Aminoasit %10 solüsyon varsayıldı.<br>
+    Elektrolit/mineral önerileri yenidoğan için yaklaşık değerlerdir.<br>
+    Klinik durum, laboratuvar ve doktor onayı şarttır.
   </div>
 </div>
 
 <script>
+function otomatikDoldur() {
+  const grup = document.getElementById("grup").value;
+  if (grup === "yenidogan") {
+    document.getElementById("sivi").value = 90;     // ilk günlerde düşük başlama
+    document.getElementById("enerji").value = 80;   // başlangıç ~70-90
+    document.getElementById("protein").value = 3.0; // yenidoğan için yüksek protein
+    document.getElementById("lipid_yuzde").value = 30;
+  } else {
+    // diğer gruplar için varsayılan veya boş bırak
+    document.getElementById("sivi").value = 100;
+    document.getElementById("enerji").value = 80;
+    document.getElementById("protein").value = 2.5;
+    document.getElementById("lipid_yuzde").value = 35;
+  }
+}
+
 function hesaplaTPN() {
   const grup   = document.getElementById("grup").value;
   const kg     = parseFloat(document.getElementById("kg").value)     || 0;
@@ -167,11 +188,11 @@ function hesaplaTPN() {
   const lipidY = parseFloat(document.getElementById("lipid_yuzde").value) || 35;
 
   if (!grup || kg <= 0) {
-    alert("Lütfen hasta grubunu seçin ve geçerli bir kilo girin.");
+    alert("Hasta grubunu seçin ve geçerli kilo girin.");
     return;
   }
 
-  // Temel hesaplamalar
+  // Hesaplamalar
   const toplamEnerji   = enerji * kg;
   const proteinG       = prot   * kg;
   const proteinKcal    = proteinG * 4;
@@ -181,30 +202,47 @@ function hesaplaTPN() {
   const glukozG        = (nonProteinKcal - lipidKcal) / 3.4;
   const toplamHacim    = sivi * kg;
 
-  const gir            = (glukozG * 1000) / (kg * 1440);   // mg/kg/dk
-  const lipidHacim20   = lipidG * 5;                        // %20 lipid → 5 mL/g
+  const gir            = (glukozG * 1000) / (kg * 1440);
+  const lipidHacim20   = lipidG * 5;                // %20 lipid
   const kalanHacim     = toplamHacim - lipidHacim20;
   const dekstrozYuzde  = kalanHacim > 0 ? (glukozG * 10) / kalanHacim : 0;
 
+  // %10 aminoasit hacmi
+  const aaHacim10      = proteinG * 10;             // 10 g/100 mL → 10 mL/g
+
+  // Elektrolit önerileri (yenidoğan için yaklaşık mmol/kg/gün)
+  let elektrolitler = "";
+  if (grup === "yenidogan") {
+    elektrolitler = `
+      <tr><td>Sodyum (Na)</td><td>1-3 mmol/kg/gün (ilk günlerde düşük başla)</td></tr>
+      <tr><td>Potasyum (K)</td><td>1-3 mmol/kg/gün (genelde 2-3)</td></tr>
+      <tr><td>Kalsiyum (Ca)</td><td>0.8-1.5 mmol/kg/gün (~32-60 mg/kg)</td></tr>
+      <tr><td>Fosfor (P)</td><td>0.5-1.2 mmol/kg/gün</td></tr>
+      <tr><td>Magnezyum (Mg)</td><td>0.1-0.3 mmol/kg/gün</td></tr>
+    `;
+  }
+
   // Uyarılar
   let uyari = "";
-  if (gir > 14) uyari += "→ GIR >14 mg/kg/dk (çok yüksek olabilir)<br>";
-  if (enerji < 60 && grup !== "yenidogan") uyari += "→ Düşük enerji (refeeding riski?)<br>";
-  if (prot < 1.5) uyari += "→ Protein düşük olabilir<br>";
+  if (gir > 12) uyari += "→ GIR >12 mg/kg/dk (dikkatli artırın)<br>";
+  if (enerji < 60 && grup === "yenidogan") uyari += "→ Yenidoğanda enerji düşük olabilir<br>";
+  if (prot < 2.0 && grup === "yenidogan") uyari += "→ Yenidoğanda protein düşük olabilir<br>";
 
   // Sonuç HTML
   let html = `
     <table>
       <tr><td>Toplam enerji</td><td>${toplamEnerji.toFixed(0)} kcal/gün</td></tr>
       <tr><td>Protein</td><td>${proteinG.toFixed(1)} g/gün  (${prot.toFixed(1)} g/kg)</td></tr>
+      <tr><td>%10 Aminoasit hacmi</td><td>${aaHacim10.toFixed(0)} mL</td></tr>
       <tr><td>Lipid</td><td>${lipidG.toFixed(1)} g/gün</td></tr>
+      <tr><td>%20 Lipid solüsyon</td><td>${lipidHacim20.toFixed(0)} mL</td></tr>
       <tr><td>Glukoz / Karbonhidrat</td><td>${glukozG.toFixed(1)} g/gün</td></tr>
       <tr><td>GIR</td><td><b>${gir.toFixed(1)}</b> mg/kg/dk</td></tr>
       <tr><td>Toplam sıvı</td><td>${toplamHacim.toFixed(0)} mL/gün</td></tr>
-      <tr><td>%20 Lipid solüsyon</td><td>${lipidHacim20.toFixed(0)} mL</td></tr>
       <tr><td>Kalan hacim (AA + dekstroz)</td><td>${kalanHacim.toFixed(0)} mL</td></tr>
       <tr><td>Tahmini % dekstroz</td><td>${dekstrozYuzde.toFixed(1)} %</td></tr>
     </table>
+    ${elektrolitler ? `<h5 style="margin-top:16px;">Elektrolit/Mineral Önerileri (Yenidoğan)</h5><table>${elektrolitler}</table>` : ''}
   `;
 
   if (uyari) {
@@ -213,6 +251,18 @@ function hesaplaTPN() {
 
   document.getElementById("sonuc").innerHTML = html;
   document.getElementById("sonuc").style.display = "block";
+  document.getElementById("kopyalaBtn").style.display = "block";
+}
+
+function kopyalaSonuc() {
+  const sonucAlani = document.getElementById("sonuc");
+  const range = document.createRange();
+  range.selectNode(sonucAlani);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+  document.execCommand("copy");
+  window.getSelection().removeAllRanges();
+  alert("Sonuçlar panoya kopyalandı!");
 }
 </script>
 
