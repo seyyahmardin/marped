@@ -1,115 +1,218 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>MARPED – TPN Hesaplama</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-body{font-family:Arial;background:#f4f6f8;margin:0;padding-bottom:70px}
-header{background:#6f42c1;color:white;padding:15px;text-align:center}
-.container{padding:20px;max-width:450px;margin:auto}
-.card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-select,input,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
-button{background:#6f42c1;color:white;border:none;border-radius:8px}
-.result{margin-top:15px;font-size:15px}
-.back{text-align:center;margin-top:15px}
-.back a{text-decoration:none;color:#6f42c1}
-small{color:#666}
-
-/* ALT SABİT MENÜ */
-.bottom-menu{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:#6f42c1;
-  display:flex;
-  justify-content:space-around;
-  padding:8px 0;
-  z-index:1000;
-}
-
-.bottom-menu a{
-  color:white;
-  text-decoration:none;
-  font-size:14px;
-  text-align:center;
-  flex:1;
-}
-
-.bottom-menu span{
-  font-size:12px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MARPED – TPN Hesaplama</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacOSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding-bottom: 80px;
+      color: #333;
+    }
+    header {
+      background: #6f42c1;
+      color: white;
+      padding: 16px;
+      text-align: center;
+    }
+    .container {
+      padding: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+    label {
+      display: block;
+      margin: 12px 0 4px;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    select, input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: #6f42c1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #5a32a3;
+    }
+    .result {
+      margin-top: 24px;
+      background: #f0f8ff;
+      border: 1px solid #b3d4fc;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .result table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .result td {
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .result td:first-child {
+      font-weight: 600;
+      width: 55%;
+    }
+    .warning {
+      color: #c0392b;
+      font-size: 0.9rem;
+      margin-top: 12px;
+    }
+    .note {
+      font-size: 0.85rem;
+      color: #555;
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+    .bottom-menu {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #6f42c1;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      z-index: 1000;
+    }
+    .bottom-menu a {
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+      text-align: center;
+      flex: 1;
+    }
+    .bottom-menu span {
+      font-size: 11px;
+      display: block;
+    }
+  </style>
 </head>
-
 <body>
 
 <header>
-<h2>TPN Hesaplama</h2>
-<p>Pediatrik Klinik Destek</p>
+  <h2>TPN Hesaplama</h2>
+  <p>Pediatrik Total Parenteral Beslenme</p>
 </header>
 
 <div class="container">
-<div class="card">
+  <div class="card">
 
-<label>Hasta grubu</label>
-<select id="grup">
-<option value="">Seçiniz</option>
-<option value="yenidogan">Yenidoğan</option>
-<option value="cocuk">Çocuk</option>
-</select>
+    <label>Hasta grubu</label>
+    <select id="grup">
+      <option value="">Seçiniz</option>
+      <option value="yenidogan">Yenidoğan / Prematüre</option>
+      <option value="cocuk">Çocuk (1 ay – 10 yaş)</option>
+      <option value="buyuk_cocuk">Büyük çocuk / Adölesan</option>
+    </select>
 
-<label>Kilo (kg)</label>
-<input type="number" id="kg" placeholder="Örn: 3.2">
+    <label>Kilo (kg)</label>
+    <input type="number" id="kg" step="0.01" min="0.4" placeholder="Örn: 3.45">
 
-<button onclick="hesapla()">Hesapla</button>
+    <label>Toplam sıvı hedefi (mL/kg/gün)</label>
+    <input type="number" id="sivi" step="1" value="100" min="60" max="160">
 
-<div class="result" id="sonuc"></div>
+    <label>Hedef enerji (kcal/kg/gün)</label>
+    <input type="number" id="enerji" step="1" value="80" min="40" max="120">
 
-</div>
+    <label>Protein hedefi (g/kg/gün)</label>
+    <input type="number" id="protein" step="0.1" value="2.5" min="1.0" max="4.0">
+
+    <label>Lipid oranı (non-protein kalorinin %)</label>
+    <input type="number" id="lipid_yuzde" step="5" value="35" min="20" max="50">
+
+    <button onclick="hesaplaTPN()">Hesapla</button>
+
+    <div class="result" id="sonuc" style="display:none;"></div>
+
+  </div>
+
+  <div class="note">
+    ⚠️ Bu değerler başlangıç önerisidir.<br>
+    Elektrolit, mineral, karaciğer/böbrek fonksiyonu, sepsis, refeeding riski gibi klinik duruma göre ayarlanmalıdır.<br>
+    Hesaplamalar ESPGHAN/ESPEN önerilerine dayanır. Nihai karar hekime aittir.
+  </div>
 </div>
 
 <script>
-function hesapla(){
-let grup=document.getElementById("grup").value;
-let kg=parseFloat(document.getElementById("kg").value);
+function hesaplaTPN() {
+  const grup   = document.getElementById("grup").value;
+  const kg     = parseFloat(document.getElementById("kg").value)     || 0;
+  const sivi   = parseFloat(document.getElementById("sivi").value)   || 100;
+  const enerji = parseFloat(document.getElementById("enerji").value) || 80;
+  const prot   = parseFloat(document.getElementById("protein").value)|| 2.5;
+  const lipidY = parseFloat(document.getElementById("lipid_yuzde").value) || 35;
 
-if(!grup||kg<=0){
-document.getElementById("sonuc").innerHTML="Lütfen tüm alanları doldurun.";
-return;
-}
+  if (!grup || kg <= 0) {
+    alert("Lütfen hasta grubunu seçin ve geçerli bir kilo girin.");
+    return;
+  }
 
-let kcal, protein, lipid, glukoz, gir;
+  // Temel hesaplamalar
+  const toplamEnerji   = enerji * kg;
+  const proteinG       = prot   * kg;
+  const proteinKcal    = proteinG * 4;
+  const nonProteinKcal = toplamEnerji - proteinKcal;
+  const lipidKcal      = nonProteinKcal * (lipidY / 100);
+  const lipidG         = lipidKcal / 9;
+  const glukozG        = (nonProteinKcal - lipidKcal) / 3.4;
+  const toplamHacim    = sivi * kg;
 
-if(grup=="yenidogan"){
-kcal=kg*90;
-protein=kg*3;
-lipid=kg*2;
-glukoz=kg*10;
-}
+  const gir            = (glukozG * 1000) / (kg * 1440);   // mg/kg/dk
+  const lipidHacim20   = lipidG * 5;                        // %20 lipid → 5 mL/g
+  const kalanHacim     = toplamHacim - lipidHacim20;
+  const dekstrozYuzde  = kalanHacim > 0 ? (glukozG * 10) / kalanHacim : 0;
 
-if(grup=="cocuk"){
-kcal=kg*70;
-protein=kg*2;
-lipid=kg*1.5;
-glukoz=kg*8;
-}
+  // Uyarılar
+  let uyari = "";
+  if (gir > 14) uyari += "→ GIR >14 mg/kg/dk (çok yüksek olabilir)<br>";
+  if (enerji < 60 && grup !== "yenidogan") uyari += "→ Düşük enerji (refeeding riski?)<br>";
+  if (prot < 1.5) uyari += "→ Protein düşük olabilir<br>";
 
-gir=(glukoz*1000)/(kg*1440);
+  // Sonuç HTML
+  let html = `
+    <table>
+      <tr><td>Toplam enerji</td><td>${toplamEnerji.toFixed(0)} kcal/gün</td></tr>
+      <tr><td>Protein</td><td>${proteinG.toFixed(1)} g/gün  (${prot.toFixed(1)} g/kg)</td></tr>
+      <tr><td>Lipid</td><td>${lipidG.toFixed(1)} g/gün</td></tr>
+      <tr><td>Glukoz / Karbonhidrat</td><td>${glukozG.toFixed(1)} g/gün</td></tr>
+      <tr><td>GIR</td><td><b>${gir.toFixed(1)}</b> mg/kg/dk</td></tr>
+      <tr><td>Toplam sıvı</td><td>${toplamHacim.toFixed(0)} mL/gün</td></tr>
+      <tr><td>%20 Lipid solüsyon</td><td>${lipidHacim20.toFixed(0)} mL</td></tr>
+      <tr><td>Kalan hacim (AA + dekstroz)</td><td>${kalanHacim.toFixed(0)} mL</td></tr>
+      <tr><td>Tahmini % dekstroz</td><td>${dekstrozYuzde.toFixed(1)} %</td></tr>
+    </table>
+  `;
 
-document.getElementById("sonuc").innerHTML=
-`<b>Günlük Enerji:</b> ${kcal.toFixed(0)} kcal<br>
-<b>Protein:</b> ${protein.toFixed(1)} g/gün<br>
-<b>Lipid:</b> ${lipid.toFixed(1)} g/gün<br>
-<b>Glukoz:</b> ${glukoz.toFixed(1)} g/gün<br>
-<b>GIR:</b> ${gir.toFixed(1)} mg/kg/dk<br><br>
-<small>
-⚠️ Değerler başlangıç önerisidir.<br>
-Elektrolit, sıvı ve klinik duruma göre düzenlenmelidir.<br>
-Nihai sorumluluk hekimindir.
-</small>`;
+  if (uyari) {
+    html += `<div class="warning">${uyari}</div>`;
+  }
+
+  document.getElementById("sonuc").innerHTML = html;
+  document.getElementById("sonuc").style.display = "block";
 }
 </script>
 
