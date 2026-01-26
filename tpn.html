@@ -9,7 +9,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #f4f6f8;
       margin: 0;
-      padding-bottom: 90px;
+      padding-bottom: 100px;
       color: #333;
     }
     header {
@@ -55,10 +55,6 @@
       cursor: pointer;
     }
     button:hover { background: #5a32a3; }
-    #kopyalaBtn {
-      background: #28a745;
-    }
-    #kopyalaBtn:hover { background: #218838; }
     .result {
       margin-top: 20px;
       background: #f0f8ff;
@@ -79,17 +75,10 @@
       font-weight: 600;
       width: 58%;
     }
-    .warning {
-      color: #c0392b;
-      font-size: 0.9rem;
-      margin-top: 12px;
-    }
-    .note {
-      font-size: 0.85rem;
-      color: #555;
-      margin-top: 20px;
-      line-height: 1.4;
-    }
+    .warning { color: #c0392b; font-size: 0.9rem; margin-top: 12px; }
+    .note { font-size: 0.85rem; color: #555; margin-top: 20px; line-height: 1.4; }
+    .ok { color: #146c43; font-weight: bold; }
+    .best { background: #e9f7ef; padding: 10px; border-radius: 8px; margin: 12px 0; }
     .bottom-menu {
       position: fixed;
       bottom: 0;
@@ -118,7 +107,7 @@
 
 <header>
   <h2>TPN Hesaplama</h2>
-  <p>Pediatrik Total Parenteral Beslenme</p>
+  <p>Pediatrik Total Parenteral Beslenme + GIR → Glukoz Karışımı</p>
 </header>
 
 <div class="container">
@@ -147,18 +136,20 @@
     <label>Lipid oranı (non-protein kalorinin %)</label>
     <input type="number" id="lipid_yuzde" step="5" value="35" min="20" max="50">
 
+    <label>Hedef GIR (mg/kg/dk) – Glukoz için</label>
+    <input type="number" id="hedef_gir" step="0.1" value="8" min="4" max="14">
+
     <button onclick="hesaplaTPN()">Hesapla</button>
 
     <div class="result" id="sonuc"></div>
-    <button id="kopyalaBtn" style="display:none;" onclick="kopyalaSonuc()">Sonuçları Kopyala</button>
 
   </div>
 
   <div class="note">
-    ⚠️ Başlangıç değerleri ESPGHAN/ESPEN 2018 + güncel yorumlar ve Türk Neonatoloji Derneği yaklaşımlarına göre.<br>
-    Lipid %20 solüsyon, Aminoasit %10 solüsyon varsayıldı.<br>
-    Elektrolit/mineral önerileri yenidoğan için yaklaşık değerlerdir.<br>
-    Klinik durum, laboratuvar ve doktor onayı şarttır.
+    ⚠️ Lipid %20, Aminoasit %10 solüsyon varsayıldı.<br>
+    GIR ve glukoz karışımı hesapları kalan sıvıya göre otomatik yapılır.<br>
+    Periferik ven için max %12-13 dekstroz önerilir.<br>
+    Klinik durum ve laboratuvara göre ayarlayınız.
   </div>
 </div>
 
@@ -166,17 +157,29 @@
 function otomatikDoldur() {
   const grup = document.getElementById("grup").value;
   if (grup === "yenidogan") {
-    document.getElementById("sivi").value = 90;     // ilk günlerde düşük başlama
-    document.getElementById("enerji").value = 80;   // başlangıç ~70-90
-    document.getElementById("protein").value = 3.0; // yenidoğan için yüksek protein
+    document.getElementById("sivi").value = 90;
+    document.getElementById("enerji").value = 80;
+    document.getElementById("protein").value = 3.0;
     document.getElementById("lipid_yuzde").value = 30;
+    document.getElementById("hedef_gir").value = 6; // yenidoğan başlangıç düşük
   } else {
-    // diğer gruplar için varsayılan veya boş bırak
     document.getElementById("sivi").value = 100;
     document.getElementById("enerji").value = 80;
     document.getElementById("protein").value = 2.5;
     document.getElementById("lipid_yuzde").value = 35;
+    document.getElementById("hedef_gir").value = 8;
   }
+}
+
+function kombinasyon(c1, c2, vol, hedef_glukoz) {
+  let g1 = c1 / 100, g2 = c2 / 100;
+  let x = (hedef_glukoz - g2 * vol) / (g1 - g2);
+  if (x < 0 || x > vol) return null;
+  return {
+    d1: c1, ml1: x,
+    d2: c2, ml2: vol - x,
+    maxDex: Math.max(c1, c2)
+  };
 }
 
 function hesaplaTPN() {
@@ -186,13 +189,14 @@ function hesaplaTPN() {
   const enerji = parseFloat(document.getElementById("enerji").value) || 80;
   const prot   = parseFloat(document.getElementById("protein").value)|| 2.5;
   const lipidY = parseFloat(document.getElementById("lipid_yuzde").value) || 35;
+  const hedefGIR = parseFloat(document.getElementById("hedef_gir").value) || 8;
 
   if (!grup || kg <= 0) {
     alert("Hasta grubunu seçin ve geçerli kilo girin.");
     return;
   }
 
-  // Hesaplamalar
+  // TPN temel hesaplamalar
   const toplamEnerji   = enerji * kg;
   const proteinG       = prot   * kg;
   const proteinKcal    = proteinG * 4;
@@ -203,30 +207,29 @@ function hesaplaTPN() {
   const toplamHacim    = sivi * kg;
 
   const gir            = (glukozG * 1000) / (kg * 1440);
-  const lipidHacim20   = lipidG * 5;                // %20 lipid
+  const lipidHacim20   = lipidG * 5;
   const kalanHacim     = toplamHacim - lipidHacim20;
-  const dekstrozYuzde  = kalanHacim > 0 ? (glukozG * 10) / kalanHacim : 0;
+  const aaHacim10      = proteinG * 10;
 
-  // %10 aminoasit hacmi
-  const aaHacim10      = proteinG * 10;             // 10 g/100 mL → 10 mL/g
+  // GIR → Glukoz karışımı hesabı (kalan hacim için)
+  let glukozHedef = hedefGIR * kg * 1440 / 1000; // günlük glukoz gram
+  let hedefYuzde  = kalanHacim > 0 ? (glukozHedef / kalanHacim) * 100 : 0;
 
-  // Elektrolit önerileri (yenidoğan için yaklaşık mmol/kg/gün)
-  let elektrolitler = "";
-  if (grup === "yenidogan") {
-    elektrolitler = `
-      <tr><td>Sodyum (Na)</td><td>1-3 mmol/kg/gün (ilk günlerde düşük başla)</td></tr>
-      <tr><td>Potasyum (K)</td><td>1-3 mmol/kg/gün (genelde 2-3)</td></tr>
-      <tr><td>Kalsiyum (Ca)</td><td>0.8-1.5 mmol/kg/gün (~32-60 mg/kg)</td></tr>
-      <tr><td>Fosfor (P)</td><td>0.5-1.2 mmol/kg/gün</td></tr>
-      <tr><td>Magnezyum (Mg)</td><td>0.1-0.3 mmol/kg/gün</td></tr>
-    `;
+  let combos = [
+    kombinasyon(10, 5, kalanHacim, glukozHedef),
+    kombinasyon(20, 10, kalanHacim, glukozHedef),
+    kombinasyon(30, 20, kalanHacim, glukozHedef)
+  ].filter(x => x);
+
+  let bestCombo = null;
+  if (combos.length > 0) {
+    bestCombo = combos.reduce((a, b) => a.maxDex < b.maxDex ? a : b);
   }
 
   // Uyarılar
   let uyari = "";
   if (gir > 12) uyari += "→ GIR >12 mg/kg/dk (dikkatli artırın)<br>";
-  if (enerji < 60 && grup === "yenidogan") uyari += "→ Yenidoğanda enerji düşük olabilir<br>";
-  if (prot < 2.0 && grup === "yenidogan") uyari += "→ Yenidoğanda protein düşük olabilir<br>";
+  if (hedefYuzde > 12.5 && kalanHacim > 0) uyari += "→ Kalan sıvıda % dekstroz >12.5 olabilir (periferik ven için riskli)<br>";
 
   // Sonuç HTML
   let html = `
@@ -237,32 +240,48 @@ function hesaplaTPN() {
       <tr><td>Lipid</td><td>${lipidG.toFixed(1)} g/gün</td></tr>
       <tr><td>%20 Lipid solüsyon</td><td>${lipidHacim20.toFixed(0)} mL</td></tr>
       <tr><td>Glukoz / Karbonhidrat</td><td>${glukozG.toFixed(1)} g/gün</td></tr>
-      <tr><td>GIR</td><td><b>${gir.toFixed(1)}</b> mg/kg/dk</td></tr>
+      <tr><td>GIR (hesaplanan)</td><td><b>${gir.toFixed(1)}</b> mg/kg/dk</td></tr>
       <tr><td>Toplam sıvı</td><td>${toplamHacim.toFixed(0)} mL/gün</td></tr>
       <tr><td>Kalan hacim (AA + dekstroz)</td><td>${kalanHacim.toFixed(0)} mL</td></tr>
-      <tr><td>Tahmini % dekstroz</td><td>${dekstrozYuzde.toFixed(1)} %</td></tr>
+      <tr><td>Hedef GIR (girdiğiniz)</td><td>${hedefGIR.toFixed(1)} mg/kg/dk</td></tr>
     </table>
-    ${elektrolitler ? `<h5 style="margin-top:16px;">Elektrolit/Mineral Önerileri (Yenidoğan)</h5><table>${elektrolitler}</table>` : ''}
   `;
 
-  if (uyari) {
-    html += `<div class="warning">${uyari}</div>`;
+  // Glukoz karışımı bölümü
+  if (kalanHacim > 0) {
+    html += `
+      <h5 style="margin-top:16px;">Kalan Sıvı (${kalanHacim.toFixed(0)} mL) için Glukoz Karışımı</h5>
+      <p><b>Günlük glukoz ihtiyacı (hedef GIR'e göre):</b> ${glukozHedef.toFixed(1)} g</p>
+      <p><b>Ortalama hedef konsantrasyon:</b> %${hedefYuzde.toFixed(1)}</p>
+    `;
+
+    if (combos.length === 0) {
+      html += `<p class="warning">⚠️ Bu GIR bu hacimde D5-D10-D20-D30 ile sağlanamaz.</p>`;
+    } else {
+      combos.forEach(c => {
+        html += `<div class="ok">
+          ${c.ml1.toFixed(0)} mL D${c.d1} + ${c.ml2.toFixed(0)} mL D${c.d2}
+        </div>`;
+      });
+
+      if (bestCombo) {
+        html += `
+          <div class="best">
+            🏆 <b>Periferik dostu en iyi öneri:</b><br>
+            ${bestCombo.ml1.toFixed(0)} mL D${bestCombo.d1} + ${bestCombo.ml2.toFixed(0)} mL D${bestCombo.d2}
+            (max %${bestCombo.maxDex})
+          </div>
+        `;
+      }
+    }
+  } else {
+    html += `<p class="warning">Lipid hacmi toplam sıvıyı aştı → glukoz karışımı hesaplanamadı.</p>`;
   }
+
+  if (uyari) html += `<div class="warning">${uyari}</div>`;
 
   document.getElementById("sonuc").innerHTML = html;
   document.getElementById("sonuc").style.display = "block";
-  document.getElementById("kopyalaBtn").style.display = "block";
-}
-
-function kopyalaSonuc() {
-  const sonucAlani = document.getElementById("sonuc");
-  const range = document.createRange();
-  range.selectNode(sonucAlani);
-  window.getSelection().removeAllRanges();
-  window.getSelection().addRange(range);
-  document.execCommand("copy");
-  window.getSelection().removeAllRanges();
-  alert("Sonuçlar panoya kopyalandı!");
 }
 </script>
 
