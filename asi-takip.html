@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>MARPED – Aşı Takip Şablonu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding-bottom: 100px; line-height: 1.6; }
+    header { background: #6f42c1; color: white; padding: 15px; text-align: center; }
+    .container { padding: 20px; max-width: 700px; margin: auto; }
+    .card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    input[type="date"], button { width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #6f42c1; color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background: #5a369e; }
+    .result { margin-top: 25px; padding: 20px; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; white-space: pre-wrap; font-size: 14px; line-height: 1.7; }
+    .done { color: #198754; text-decoration: line-through; }
+    .upcoming { color: #dc3545; font-weight: bold; }
+    .bottom-menu { position: fixed; bottom: 0; left: 0; width: 100%; background: #6f42c1; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; }
+    .bottom-menu a { color: white; text-decoration: none; font-size: 14px; text-align: center; flex: 1; }
+    .bottom-menu span { font-size: 12px; display: block; }
+    .bottom-menu a.active { background: rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Aşı Takip Şablonu (2025)</h2>
+  <p>Doğum tarihini gir → yapılan aşıları işaretle → eksik/yaklaşanları gör</p>
+</header>
+
+<div class="container">
+  <div class="card">
+    <label for="dogumTarihi">Bebeğin Doğum Tarihi</label>
+    <input type="date" id="dogumTarihi">
+
+    <h3 style="margin-top:20px;">Yapılan Aşıları İşaretleyin</h3>
+
+    <div id="asiListesi"></div>
+
+    <button onclick="asiTakipHesapla()" style="margin-top:20px;">Hesapla & Şablon Oluştur</button>
+
+    <div class="result" id="sonuc"></div>
+
+    <button onclick="metniKopyala()" style="margin-top:15px;">📋 Tam Takip Notunu Kopyala</button>
+  </div>
+</div>
+
+<script>
+const asiTakvimi = [
+  { id: "hepb1", ad: "Hepatit B (1. doz)", zaman: "doğum", ay: 0 },
+  { id: "bcg", ad: "BCG (Verem)", zaman: "2. ay", ay: 2 },
+  { id: "karma1", ad: "6'li Karma (1. doz)", zaman: "2. ay", ay: 2 },
+  { id: "kpa1", ad: "Pnömokok (KPA - 1. doz)", zaman: "2. ay", ay: 2 },
+  { id: "karma2", ad: "6'li Karma (2. doz)", zaman: "4. ay", ay: 4 },
+  { id: "kpa2", ad: "Pnömokok (2. doz)", zaman: "4. ay", ay: 4 },
+  { id: "karma3", ad: "6'li Karma (3. doz)", zaman: "6. ay", ay: 6 },
+  { id: "kpa3", ad: "Pnömokok (3. doz)", zaman: "6. ay", ay: 6 },
+  { id: "opa1", ad: "OPA (Çocuk felci - 1. doz)", zaman: "6. ay", ay: 6 },
+  { id: "kkk1", ad: "KKK (1. doz)", zaman: "12. ay", ay: 12 },
+  { id: "sucicegi1", ad: "Suçiçeği (1. doz)", zaman: "12. ay", ay: 12 },
+  { id: "kpa_rapel", ad: "Pnömokok (rapel)", zaman: "12. ay", ay: 12 },
+  { id: "karma_rapel", ad: "6'li Karma (rapel)", zaman: "18. ay", ay: 18 },
+  { id: "opa2", ad: "OPA (2. doz)", zaman: "18. ay", ay: 18 },
+  { id: "hepa1", ad: "Hepatit A (1. doz)", zaman: "18. ay", ay: 18 },
+  { id: "hepa2", ad: "Hepatit A (2. doz)", zaman: "24. ay", ay: 24 },
+  { id: "kkk2", ad: "KKK (2. doz)", zaman: "48. ay (4 yaş)", ay: 48 },
+  { id: "dabt_ipa", ad: "DaBT-İPA (rapel)", zaman: "48. ay", ay: 48 },
+  { id: "sucicegi2", ad: "Suçiçeği (2. doz)", zaman: "48. ay", ay: 48 },
+  { id: "td", ad: "Td (Tetanoz-Difteri rapel)", zaman: "13 yaş", ay: 156 }
+];
+
+function asiTakipHesapla() {
+  const dogumTarihi = document.getElementById("dogumTarihi").value;
+  if (!dogumTarihi) {
+    document.getElementById("sonuc").innerHTML = '<div style="color:#dc3545;">Lütfen doğum tarihini girin.</div>';
+    return;
+  }
+
+  const dogum = new Date(dogumTarihi);
+  const bugun = new Date();
+  const yasGun = Math.floor((bugun - dogum) / (1000 * 60 * 60 * 24));
+  const yasAy = Math.floor(yasGun / 30.4);
+
+  let yapilan = [];
+  document.querySelectorAll('input[name="asi"]:checked').forEach(el => yapilan.push(el.value));
+
+  let metin = `AŞI TAKİP NOTU (${yasAy} aylık bebek)\nDoğum: ${dogum.toLocaleDateString('tr-TR')}\n\n`;
+
+  asiTakvimi.forEach(asi => {
+    const gecikme = yasAy - asi.ay;
+    let durum = "";
+    if (yapilan.includes(asi.id)) {
+      durum = `<span class="done">${asi.ad} – YAPILDI</span>`;
+    } else if (gecikme >= 0) {
+      durum = `<span class="upcoming">${asi.ad} – EKSİK / GEÇ KALINDI (${asi.zaman})</span>`;
+    } else {
+      durum = `${asi.ad} – Yaklaşan (${asi.zaman})`;
+    }
+    metin += `${durum}\n`;
+  });
+
+  metin += `\nNot: Eksik aşılar en kısa sürede tamamlanmalı. e-Nabız üzerinden takip edebilirsiniz.`;
+
+  document.getElementById("sonuc").innerHTML = metin;
+}
+
+function metniKopyala() {
+  const metin = document.getElementById("sonuc").innerText;
+  if (!metin.trim() || metin.includes("doğum tarihini girin")) {
+    alert("Önce doğum tarihi girip hesaplayın.");
+    return;
+  }
+  navigator.clipboard.writeText(metin).then(() => {
+    alert("Aşı takip notu panoya kopyalandı!");
+  }).catch(() => {
+    alert("Kopyalama başarısız. Metni manuel kopyalayın.");
+  });
+}
+
+// Sayfa yüklendiğinde aşı listesini oluştur
+document.addEventListener("DOMContentLoaded", () => {
+  let listeHtml = '<h3 style="margin-top:20px;">Yapılan Aşıları İşaretleyin</h3>';
+  asiTakvimi.forEach(asi => {
+    listeHtml += `
+      <label style="display:block; margin:8px 0;">
+        <input type="checkbox" name="asi" value="${asi.id}">
+        ${asi.ad} (${asi.zaman})
+      </label>`;
+  });
+  document.getElementById("asiListesi").innerHTML = listeHtml;
+});
+</script>
+
+<div class="bottom-menu">
+  <a href="index.html">🏠<br><span>Ana Menü</span></a>
+  <a href="sivi.html">💧<br><span>Sıvı</span></a>
+  <a href="asi-takip.html" class="active">💉<br><span>Aşı Takip</span></a>
+  <a href="fizikmuayene.html">🩺<br><span>Muayene</span></a>
+</div>
+
+</body>
+</html>
