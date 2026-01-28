@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aile Reçeteleri | MAR PED</title>
+  <style>
+    :root {
+      --primary: #4a90e2;
+      --primary-dark: #357abd;
+      --bg: #f8fbff;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --gray: #7f8c8d;
+      --success: #27ae60;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    header h1 { margin: 0; font-size: 2.2rem; }
+    .back-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.25);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: bold;
+      backdrop-filter: blur(4px);
+      transition: all 0.3s;
+    }
+    .back-btn:hover {
+      background: rgba(255,255,255,0.4);
+      transform: translateX(-5px);
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 15px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    h2 { color: var(--primary); margin: 0 0 1rem; font-size: 1.5rem; }
+    h3 { color: #34495e; margin: 1rem 0 0.8rem; font-size: 1.2rem; }
+    .reçete {
+      background: #f9fcff;
+      padding: 1.2rem;
+      border-radius: 12px;
+      border: 1px solid #e3f0ff;
+      margin: 1rem 0;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .copy-btn:hover { background: #219653; }
+    .warning {
+      background: #fff8e1;
+      border-left: 5px solid #e67e22;
+      padding: 1rem;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .bottom-footer {
+      text-align: center;
+      margin: 3rem 0 1rem;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="back-btn">⬅️ Ana Menü</a>
+
+<header>
+  <h1>Aile Reçeteleri</h1>
+  <p>Poliklinikte sık karşılaşılan durumlar için hazır reçete şablonları</p>
+</header>
+
+<div class="container">
+
+  <div class="warning">
+    <strong>⚠️ Önemli Uyarı:</strong><br>
+    Bu reçeteler bilgilendirme amaçlıdır. Doz, ilaç ve süre <strong>mutlaka hekim tarafından onaylanmalıdır</strong>.<br>
+    Aileye verilecek reçete değildir – hekim kontrolünde kullanılmalıdır.
+  </div>
+
+  <!-- Reçete Kartları -->
+  <div class="card">
+    <h2>Üst Solunum Yolu Enfeksiyonu / Nazofarenjit</h2>
+    <div class="reçete">
+      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
+      <h3>Reçete Örneği</h3>
+      <p><strong>Parasetamol şurup 120 mg/5 mL</strong><br>
+      10–15 mg/kg/doz, 6–8 saatte bir, maks 4 doz/gün (ateş ve ağrı için)<br><br>
+      <strong>Burun temizliği</strong>: Serum fizyolojik sprey, günde 4–6 kez<br><br>
+      <strong>Burun tıkanıklığı için</strong>: Oksimetazolin %0.025 damla (2 yaş üstü), günde 2 kez, maks 3 gün</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Akut Otitis Media (Orta Kulak İltihabı)</h2>
+    <div class="reçete">
+      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
+      <h3>Reçete Örneği</h3>
+      <p><strong>Amoksisilin 250 mg/5 mL şurup</strong><br>
+      80–90 mg/kg/gün, 12 saatte bir, 10 gün<br><br>
+      <strong>Parasetamol şurup</strong>: 10–15 mg/kg/doz, 6–8 saatte bir (ağrı/ateş)<br><br>
+      <strong>Burun spreyi</strong>: Serum fizyolojik, günde 4–6 kez</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Akut Tonsillofarenjit (Beta Hemolitik Streptokok şüphesi)</h2>
+    <div class="reçete">
+      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
+      <h3>Reçete Örneği</h3>
+      <p><strong>Amoksisilin 250 mg/5 mL şurup</strong><br>
+      50 mg/kg/gün, 12 saatte bir, 10 gün (veya tek doz Benzatin Penisilin G IM)<br><br>
+      <strong>Parasetamol şurup</strong>: Ağrı/ateş için</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Akut Bronşiolit / Hışıltılı Çocuk</h2>
+    <div class="reçete">
+      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
+      <h3>Reçete Örneği</h3>
+      <p><strong>Salbutamol nebulizatör solüsyon %0.5</strong><br>
+      0.15 mg/kg/doz (maks 2.5 mg), 4–6 saatte bir nebulizatör ile<br><br>
+      <strong>Hipertonik salin %3</strong>: 2–4 mL, nebulizatör ile (hastanede tercih)<br><br>
+      <strong>Burun temizliği</strong>: Serum fizyolojik sprey, sık</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Akut Astım Atağı (Evde)</h2>
+    <div class="reçete">
+      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
+      <h3>Reçete Örneği</h3>
+      <p><strong>Salbutamol nebulizatör solüsyon %0.5</strong><br>
+      0.15 mg/kg/doz (maks 2.5–5 mg), 20 dak arayla 3 kez, sonra 4 saatte bir<br><br>
+      <strong>Oral Prednizolon</strong>: 1–2 mg/kg/gün, 3–5 gün (maks 60 mg/gün)</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Viral İshal / Enterit</h2>
+    <div class="reçete">
+      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
+      <h3>Reçete Örneği</h3>
+      <p><strong>Oral Rehidrasyon Solüsyonu (ORS)</strong><br>
+      Hafif-orta dehidratasyon: 50–100 mL/kg ilk 4 saatte, sonra idrar çıkışına göre<br><br>
+      <strong>Çinko sülfat şurup 20 mg/5 mL</strong><br>
+      <6 ay: 10 mg/gün<br>6 ay–5 yaş: 20 mg/gün, 10–14 gün</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Konstipasyon (Kabızlık)</h2>
+    <div class="reçete">
+      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
+      <h3>Reçete Örneği</h3>
+      <p><strong>Laktoz veya Laktiloz şurup</strong><br>
+      1–3 mL/kg/gün, sabah aç karnına<br><br>
+      <strong>Polietilen glikol (PEG 3350) toz</strong><br>
+      0.5–1 g/kg/gün, 1 hafta sonra azaltarak idame</p>
+    </div>
+  </div>
+
+  <!-- Diğer sık hastalıklar için benzer kartlar ekleyebiliriz -->
+  <!-- Örnek: Ürtiker, Konjonktivit, Bez dermatiti, Yenidoğan sarılığı vb. -->
+
+  <div class="warning">
+    <strong>Uyarı:</strong> Bu reçeteler örnek amaçlıdır. İlaç dozu, süresi ve seçimi <strong>mutlaka hekim tarafından</strong> belirlenmelidir.<br>
+    Aileye bu metinler doğrudan verilmemeli, hekim kontrolünde düzenlenmelidir.
+  </div>
+
+  <div class="bottom-footer">
+    MAR PED © 2025 | Mardin Eğitim ve Araştırma Hastanesi Pediatri Kliniği<br>
+    Dr. Ferhat Kalkan
+  </div>
+</div>
+
+<script>
+// Kopyalama fonksiyonu
+function kopyala(btn) {
+  const reçeteMetni = btn.parentElement.innerText.replace("Kopyala", "").trim();
+  navigator.clipboard.writeText(reçeteMetni).then(() => {
+    btn.innerText = "Kopyalandı!";
+    setTimeout(() => { btn.innerText = "📋 Kopyala"; }, 2000);
+  }).catch(() => {
+    alert("Kopyalama başarısız, metni manuel seçip kopyalayın.");
+  });
+}
+</script>
+
+</body>
+</html>
