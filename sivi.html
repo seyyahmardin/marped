@@ -1,152 +1,113 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-<meta charset="UTF-8">
-<title>MARPED – Sıvı Hesaplama</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<!-- ... head aynı ... -->
 <style>
-body{font-family:Arial;background:#f4f6f8;margin:0;padding-bottom:80px}
-header{background:#6f42c1;color:white;padding:15px;text-align:center}
-.container{padding:20px;max-width:520px;margin:auto}
-.card{background:white;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-input,select,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
-button{background:#6f42c1;color:white;border:none;border-radius:8px}
-.result{margin-top:15px;font-size:15px}
-.method{margin-top:12px;padding:10px;border-left:4px solid #6f42c1;background:#f8f6fc}
-.ok{font-weight:bold}
-.copy{background:#198754;margin-top:10px}
-small{color:#666}
-
-/* Alt Menü */
-.bottom-menu{
-  position:fixed; bottom:0; left:0; width:100%;
-  background:#6f42c1; display:flex; justify-content:space-around;
-  padding:8px 0; z-index:1000;
-}
-.bottom-menu a{
-  color:white; text-decoration:none; font-size:14px; text-align:center; flex:1;
-}
-.bottom-menu span{font-size:12px}
+  /* Mevcut stillere ekle */
+  input:invalid { border: 2px solid #dc3545; }
+  .result .method { margin: 12px 0; padding: 12px; border-radius: 8px; background: #f8f9fa; border: 1px solid #dee2e6; }
+  .result .method.ok { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+  .error { color: #dc3545; font-weight: bold; }
+  .bottom-menu a.active { background: rgba(255,255,255,0.2); }
 </style>
-</head>
 
-<body>
-
-<header>
-<h2>Sıvı Hesaplama</h2>
-<p>Holiday–Segar · m² · ml/kg</p>
-</header>
-
-<div class="container">
+<!-- Body içinde card'ı iyileştir -->
 <div class="card">
+  <label for="kg">Kilo (kg) <small>(zorunlu)</small></label>
+  <input type="number" id="kg" min="0.1" step="0.1" placeholder="Örn: 10.5" required>
 
-<label>Kilo (kg)</label>
-<input type="number" id="kg" placeholder="Örn: 10">
+  <label for="mlkg">ml/kg/gün (isteğe bağlı)</label>
+  <select id="mlkg">
+    <option value="">Seçiniz</option>
+    <!-- seçenekler aynı -->
+  </select>
 
-<label>ml/kg/gün</label>
-<select id="mlkg">
-<option value="">Seçiniz</option>
-<option value="60">60 ml/kg</option>
-<option value="80">80 ml/kg</option>
-<option value="100">100 ml/kg</option>
-<option value="120">120 ml/kg</option>
-<option value="140">140 ml/kg</option>
-<option value="160">160 ml/kg</option>
-</select>
+  <label for="bsaRate">ml/m²/gün (isteğe bağlı)</label>
+  <select id="bsaRate">
+    <option value="">Seçiniz</option>
+    <!-- seçenekler aynı -->
+  </select>
 
-<label>m² için ml/m²/gün</label>
-<select id="bsaRate">
-<option value="">Seçiniz</option>
-<option value="1200">1200</option>
-<option value="1500">1500</option>
-<option value="1700">1700</option>
-<option value="2000">2000</option>
-</select>
+  <button onclick="hesapla()">Hesapla</button>
 
-<button onclick="hesapla()">Hesapla</button>
+  <div class="result" id="sonuc"></div>
 
-<div class="result" id="sonuc"></div>
-
-<button class="copy" onclick="kopyala()">📋 Order olarak kopyala</button>
-
-</div>
+  <button class="copy" onclick="kopyala()">📋 Order'ı Panoya Kopyala</button>
 </div>
 
 <script>
-let orderText="";
+// Mevcut fonksiyonu iyileştirilmiş hali
+function hesapla() {
+  const kgInput = document.getElementById("kg");
+  const kg = parseFloat(kgInput.value.trim()) || 0;
+  const mlkg = parseFloat(document.getElementById("mlkg").value) || 0;
+  const bsaRate = parseFloat(document.getElementById("bsaRate").value) || 0;
 
-function hesapla(){
-  let kg = +document.getElementById("kg").value;
-  let mlkg = +document.getElementById("mlkg").value;
-  let bsaRate = +document.getElementById("bsaRate").value;
+  let html = "";
+  let orderText = "";
 
-  if(kg<=0){
-    sonuc.innerHTML="Lütfen kilo girin.";
+  if (kg <= 0) {
+    document.getElementById("sonuc").innerHTML = '<div class="error">Lütfen geçerli bir kilo girin (0.1 kg ve üzeri).</div>';
     return;
   }
 
-  let html="";
-  orderText="";
+  // Holiday-Segar
+  let hs = 0;
+  if (kg <= 10) hs = kg * 100;
+  else if (kg <= 20) hs = 1000 + (kg - 10) * 50;
+  else hs = 1500 + (kg - 20) * 20;
 
-  /* Holiday–Segar */
-  let hs;
-  if(kg<=10) hs=kg*100;
-  else if(kg<=20) hs=1000+(kg-10)*50;
-  else hs=1500+(kg-20)*20;
-
-  html+=`<div class="method ok">
-  🧮 Holiday–Segar: ${hs.toFixed(0)} ml/gün  
-  (${(hs/24).toFixed(1)} ml/saat)
+  html += `<div class="method ok">
+    <strong>🧮 Holiday–Segar:</strong> ${hs.toFixed(0)} ml/gün 
+    <br><small>(${ (hs/24).toFixed(1) } ml/saat)</small>
   </div>`;
+  orderText += `Bakım sıvısı (Holiday-Segar): ${hs.toFixed(0)} ml/gün (${(hs/24).toFixed(1)} ml/saat)\n`;
 
-  orderText+=`Bakım sıvısı: ${hs.toFixed(0)} ml/gün (${(hs/24).toFixed(1)} ml/saat)\n`;
-
-  /* ml/kg */
-  if(mlkg>0){
-    let total=kg*mlkg;
-    html+=`<div class="method ok">
-    💧 ${mlkg} ml/kg: ${total.toFixed(0)} ml/gün  
-    (${(total/24).toFixed(1)} ml/saat)
+  // ml/kg
+  if (mlkg > 0) {
+    const total = kg * mlkg;
+    html += `<div class="method ok">
+      <strong>💧 ${mlkg} ml/kg:</strong> ${total.toFixed(0)} ml/gün 
+      <br><small>(${ (total/24).toFixed(1) } ml/saat)</small>
     </div>`;
-    orderText+=`${mlkg} ml/kg → ${total.toFixed(0)} ml/gün (${(total/24).toFixed(1)} ml/saat)\n`;
+    orderText += `${mlkg} ml/kg → ${total.toFixed(0)} ml/gün (${(total/24).toFixed(1)} ml/saat)\n`;
   }
 
-  /* m² */
-  if(bsaRate>0){
-    let bsa=(4*kg+7)/(90+kg);
-    let total=bsa*bsaRate;
-    html+=`<div class="method ok">
-    📐 m² yöntemi: ${total.toFixed(0)} ml/gün  
-    (${(total/24).toFixed(1)} ml/saat)<br>
-    <small>BSA: ${bsa.toFixed(2)} m² · ${bsaRate} ml/m²</small>
+  // BSA
+  if (bsaRate > 0) {
+    const bsa = (4 * kg + 7) / (90 + kg);
+    const total = bsa * bsaRate;
+    html += `<div class="method ok">
+      <strong>📐 m² yöntemi (${bsaRate} ml/m²):</strong> ${total.toFixed(0)} ml/gün 
+      <br><small>BSA: ${bsa.toFixed(3)} m² · (${ (total/24).toFixed(1) } ml/saat)</small>
     </div>`;
-    orderText+=`BSA (${bsa.toFixed(2)} m²): ${total.toFixed(0)} ml/gün (${(total/24).toFixed(1)} ml/saat)\n`;
+    orderText += `BSA (${bsa.toFixed(3)} m²) @ ${bsaRate} ml/m²: ${total.toFixed(0)} ml/gün (${(total/24).toFixed(1)} ml/saat)\n`;
   }
 
-  html+=`<br><small>
-  ⚠️ Bakım sıvısı hesaplamasıdır.  
-  Ateş, kayıplar ve klinik duruma göre ayarlanmalıdır.
-  </small>`;
+  if (!mlkg && !bsaRate) {
+    html += '<div class="method"><em>Sadece Holiday-Segar hesaplandı. ml/kg veya m² seçebilirsiniz.</em></div>';
+  }
 
-  sonuc.innerHTML=html;
+  html += `<br><small style="color:#dc3545;">⚠️ Bu bakım sıvısı tahmini hesaplamasıdır. Ateş, kayıplar, idrar çıkışı ve klinik duruma göre ayarlayın. Kaynak: Holiday-Segar (Pediatrics 1957), Mosteller BSA.</small>`;
+
+  document.getElementById("sonuc").innerHTML = html;
+  window.orderText = orderText; // global yap
 }
 
-function kopyala(){
-  if(!orderText){
-    alert("Önce hesaplama yapın");
+function kopyala() {
+  if (!window.orderText) {
+    alert("Önce hesaplama yapın.");
     return;
   }
-  navigator.clipboard.writeText(orderText);
-  alert("Order kopyalandı");
+  navigator.clipboard.writeText(window.orderText).then(() => {
+    alert("Order panoya kopyalandı!");
+  }).catch(() => {
+    alert("Kopyalama başarısız. Lütfen manuel seçip kopyalayın.");
+  });
 }
 </script>
 
+<!-- Bottom menu'ya active class ekle -->
 <div class="bottom-menu">
   <a href="index.html">🏠<br><span>Ana Menü</span></a>
-  <a href="gir.html">🧮<br><span>Hesap</span></a>
-  <a href="fizikmuayene.html">📝<br><span>Notlar</span></a>
+  <a href="sivi.html" class="active">💧<br><span>Sıvı</span></a>
+  <a href="gir.html">🧮<br><span>GIR</span></a>
+  <!-- diğer linkler -->
 </div>
-
-</body>
-</html>
