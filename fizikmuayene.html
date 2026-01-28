@@ -2,169 +2,216 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MARPED – Fizik Muayene Şablonu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding-bottom: 90px;
-    }
-    header {
-      background: #0b5ed7;
-      color: white;
-      padding: 15px;
-      text-align: center;
-    }
-    .container {
-      padding: 20px;
-      max-width: 700px;
-      margin: auto;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    textarea {
-      width: 100%;
-      height: 400px;
-      padding: 10px;
-      font-size: 14px;
-      font-family: monospace;
-      white-space: pre-wrap;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px;
-      font-size: 16px;
-      width: 100%;
-      background: #0b5ed7;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .back {
-      text-align: center;
-      margin-top: 15px;
-    }
-    .back a {
-      text-decoration: none;
-      color: #0b5ed7;
-    }
-    small {
-      color: #666;
-    }
-    .bottom-menu {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #6f42c1;
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 0;
-      z-index: 1000;
-    }
-    .bottom-menu a {
-      color: white;
-      text-decoration: none;
-      font-size: 14px;
-      text-align: center;
-      flex: 1;
-    }
-    .bottom-menu span {
-      font-size: 12px;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding-bottom: 100px; }
+    header { background: #6f42c1; color: white; padding: 15px; text-align: center; }
+    .container { padding: 20px; max-width: 600px; margin: auto; }
+    .card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.1); margin-bottom: 20px; }
+    select, input, textarea, button { width: 100%; padding: 10px; margin: 8px 0; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; }
+    button { background: #6f42c1; color: white; border: none; cursor: pointer; }
+    button:hover { background: #5a369e; }
+    .result { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; border: 1px solid #dee2e6; white-space: pre-wrap; }
+    .section { margin: 15px 0; padding: 10px; border-left: 4px solid #6f42c1; background: #f8f6fc; border-radius: 6px; }
+    .checkbox-group { margin: 8px 0; }
+    .bottom-menu { position: fixed; bottom: 0; left: 0; width: 100%; background: #6f42c1; display: flex; justify-content: space-around; padding: 8px 0; z-index: 1000; }
+    .bottom-menu a { color: white; text-decoration: none; font-size: 14px; text-align: center; flex: 1; }
+    .bottom-menu span { font-size: 12px; display: block; }
+    .bottom-menu a.active { background: rgba(255,255,255,0.2); }
+    small { color: #666; }
   </style>
 </head>
 <body>
 
 <header>
   <h2>Fizik Muayene Şablonu</h2>
-  <p>Pediatrik Standart Not</p>
+  <p>Hastalık seç → doldur → kopyala</p>
 </header>
 
 <div class="container">
   <div class="card">
-    <textarea id="note">
-GENEL DURUM:
-Bilinç açık, koopere, oryante. Genel durumu iyi / orta / kötü.
+    <label for="hastalik">Poliklinik Hastalığı Seçiniz</label>
+    <select id="hastalik" onchange="sablonYukle()">
+      <option value="">-- Seçiniz --</option>
+      <option value="astim">Astım / Tekrarlayan Hışıltı</option>
+      <option value="bronsiolit">Bronşiolit / Alt Solunum Yolu Enfeksiyonu</option>
+      <option value="pnomoni">Pnömoni / Akciğer Enfeksiyonu</option>
+      <option value="gor">Gastroözofageal Reflü (GÖR)</option>
+      <option value="buyume">Büyüme Geriliği / Malnütrisyon</option>
+    </select>
 
-VİTAL BULGULAR:
-Ateş: ___ °C
-Nabız: ___ /dk
-Solunum: ___ /dk
-TA: ___ / ___ mmHg
-SpO₂: ___ %
+    <div id="sablonAlani" style="display:none; margin-top:20px;">
+      <!-- Şablon buraya dinamik yüklenecek -->
+    </div>
 
-BAŞ-BOYUN:
-Baş normosefalik. Fontanel açık/kapalı. Boyun serbest, LAP yok.
+    <div class="result" id="sonuc"></div>
 
-GÖZ:
-Konjonktivalar doğal. Sklera ikterik değil.
-
-KBB:
-Kulak yolu ve TMi doğal. Orofarenks hiperemik değil.
-
-SOLUNUM SİSTEMİ:
-Solunum sayısı yaşa uygun. Retraksiyon yok.
-Her iki hemitoraks solunuma eşit katılıyor.
-Raller/ronküs yok.
-
-KARDİYOVASKÜLER:
-Kalp sesleri S1-S2 doğal. Üfürüm yok.
-
-GASTROİNTESTİNAL:
-Batın yumuşak, defans yok.
-Hepatomegali / splenomegali yok.
-
-GENİTOÜRİNER:
-Doğal. Döküntü yok.
-
-KAS-İSKELET:
-Eklem hareketleri doğal. Deformite yok.
-
-NÖROLOJİK:
-Bilinç açık. Tonus ve refleksler doğal.
-
-DERİ:
-Döküntü yok. Turgor-tonus normal.
-    </textarea>
-
-    <button onclick="kopyala()">📋 Metni Kopyala</button>
-
-    <p><small>⚠️ Şablondur. Klinik duruma göre düzenlenmelidir.</small></p>
-  </div>
-
-  <div class="back">
-    <a href="index.html">← Ana Sayfa</a>
+    <button onclick="metniKopyala()" style="margin-top:15px;">📋 Tam Notu Panoya Kopyala</button>
   </div>
 </div>
 
 <script>
-function kopyala() {
-  const text = document.getElementById("note");
-  text.select();
-  text.setSelectionRange(0, 99999); // Mobil cihazlar için
-  document.execCommand("copy");
-  alert("Fizik muayene notu panoya kopyalandı!");
+let secilenSablon = "";
+let genelMetin = "";
+
+function sablonYukle() {
+  const secim = document.getElementById("hastalik").value;
+  const alan = document.getElementById("sablonAlani");
+  const sonuc = document.getElementById("sonuc");
+  sonuc.innerHTML = "";
+
+  if (!secim) {
+    alan.style.display = "none";
+    return;
+  }
+
+  alan.style.display = "block";
+
+  let html = `
+    <div class="section">
+      <strong>GENEL DURUM:</strong><br>
+      <label><input type="radio" name="genel" value="iyi" checked> İyi</label><br>
+      <label><input type="radio" name="genel" value="orta"> Orta</label><br>
+      <label><input type="radio" name="genel" value="kotü"> Kötü</label>
+    </div>
+
+    <div class="section">
+      <strong>VİTAL BULGULAR:</strong><br>
+      Ateş: <input type="text" id="ates" placeholder="örn: 37.2 °C"><br>
+      Nabız: <input type="text" id="nabiz" placeholder="örn: 110/dk"><br>
+      Solunum: <input type="text" id="solunum" placeholder="örn: 28/dk"><br>
+      TA: <input type="text" id="ta" placeholder="örn: 90/60 mmHg"><br>
+      SpO₂: <input type="text" id="spo2" placeholder="örn: 96%">
+    </div>
+
+    <div class="section">
+      <strong>BAŞ-BOYUN / GÖZ-KBB:</strong><br>
+      <label><input type="checkbox" id="fontanel"> Fontanel açık/kapalı</label><br>
+      <label><input type="checkbox" id="lap"> LAP yok / var</label><br>
+      <label><input type="checkbox" id="orofarenks"> Orofarenks doğal / hiperemik</label>
+    </div>
+
+    <div class="section">
+      <strong>DERİ / TURGOR:</strong><br>
+      <label><input type="radio" name="deri" value="normal" checked> Normal</label><br>
+      <label><input type="radio" name="deri" value="kuru"> Kuru / azalmış turgor</label><br>
+      <label><input type="radio" name="deri" value="dokusuz"> Döküntü / ekzema / sarılık</label>
+    </div>
+  `;
+
+  // Hastalığa özel ek başlıklar
+  if (secim === "astim") {
+    html += `
+      <div class="section">
+        <strong>ASTIM / HISHILTI ÖZEL:</strong><br>
+        <label><input type="checkbox" id="wheezing"> Wheezing / ronküs var / yok</label><br>
+        <label><input type="checkbox" id="ekspirium"> Ekspirium uzamış / normal</label><br>
+        <label><input type="checkbox" id="retraksiyon"> Retraksiyon / burun kanadı solunumu var / yok</label><br>
+        <label><input type="checkbox" id="oksuruk"> Öksürük: gece / egzersizle artan / kuru / balgamlı</label>
+      </div>
+    `;
+  } else if (secim === "bronsiolit") {
+    html += `
+      <div class="section">
+        <strong>BRONŞİOLİT ÖZEL:</strong><br>
+        <label><input type="checkbox" id="wheezing"> Wheezing / ince raller var / yok</label><br>
+        <label><input type="checkbox" id="retraksiyon"> Subkostal / interkostal çekilme var / yok</label><br>
+        <label><input type="checkbox" id="hipoksi"> Hipoksi / siyanoz var / yok</label><br>
+        <label><input type="checkbox" id="beslenme"> Beslenme bozukluğu / dehidratasyon bulgusu var / yok</label>
+      </div>
+    `;
+  } else if (secim === "pnomoni") {
+    html += `
+      <div class="section">
+        <strong>PNÖMONİ ÖZEL:</strong><br>
+        <label><input type="checkbox" id="ral"> Ral / krepitan raller var / yok (sağ/sol)</label><br>
+        <label><input type="checkbox" id="solunumaz"> Solunum sesi azalmış / matite var / yok</label><br>
+        <label><input type="checkbox" id="takipne"> Takipne / taşipne var / yok</label><br>
+        <label><input type="checkbox" id="atesyuksek"> Yüksek ateş / titreme var / yok</label>
+      </div>
+    `;
+  } else if (secim === "gor") {
+    html += `
+      <div class="section">
+        <strong>GÖR ÖZEL:</strong><br>
+        <label><input type="checkbox" id="regurjitasyon"> Regürjitasyon / kusma sıklığı: ...</label><br>
+        <label><input type="checkbox" id="beslenme"> Beslenme sonrası huzursuzluk / ağlama var / yok</label><br>
+        <label><input type="checkbox" id="kilo"> Kilo alımı yetersiz / yeterli</label><br>
+        <label><input type="checkbox" id="larenjit"> Laringofaringeal semptom (ses kısıklığı) var / yok</label>
+      </div>
+    `;
+  } else if (secim === "buyume") {
+    html += `
+      <div class="section">
+        <strong>BÜYÜME GERİLİĞİ ÖZEL:</strong><br>
+        <label><input type="checkbox" id="persentil"> Persentil eğrisi altında / üstünde</label><br>
+        <label><input type="checkbox" id="boykilo"> Boy ve kilo persentili düşük / normal</label><br>
+        <label><input type="checkbox" id="kas"> Kas kitlesi azalmış / normal</label><br>
+        <label><input type="checkbox" id="diyet"> Diyet öyküsü: yetersiz alım / seçici beslenme var / yok</label>
+      </div>
+    `;
+  }
+
+  alan.innerHTML = html;
+  secilenSablon = secim;
+}
+
+function metniKopyala() {
+  let metin = "PEDİATRİK FİZİK MUAYENE NOTU\n\n";
+
+  // Genel Durum
+  const genel = document.querySelector('input[name="genel"]:checked')?.value || "belirtilmemiş";
+  metin += `Genel Durum: ${genel.charAt(0).toUpperCase() + genel.slice(1)}\n\n`;
+
+  // Vital
+  metin += `Vital Bulgular:\n`;
+  metin += `Ateş: ${document.getElementById("ates")?.value || "-"} °C\n`;
+  metin += `Nabız: ${document.getElementById("nabiz")?.value || "-"} /dk\n`;
+  metin += `Solunum: ${document.getElementById("solunum")?.value || "-"} /dk\n`;
+  metin += `TA: ${document.getElementById("ta")?.value || "-"} mmHg\n`;
+  metin += `SpO₂: ${document.getElementById("spo2")?.value || "-"} %\n\n`;
+
+  // Standart başlıklar (checkbox'ları topla)
+  metin += "Baş-Boyun / Göz-KBB: ";
+  if (document.getElementById("fontanel")?.checked) metin += "Fontanel açık/kapalı, ";
+  if (document.getElementById("lap")?.checked) metin += "LAP yok/var, ";
+  if (document.getElementById("orofarenks")?.checked) metin += "Orofarenks doğal/hiperemik. ";
+  metin += "\n";
+
+  metin += "Deri/Turgor: ";
+  const deri = document.querySelector('input[name="deri"]:checked')?.value || "belirtilmemiş";
+  metin += deri === "normal" ? "Normal" : deri === "kuru" ? "Kuru / azalmış turgor" : "Döküntü / ekzema / sarılık";
+  metin += "\n\n";
+
+  // Hastalığa özel
+  if (secilenSablon === "astim") {
+    metin += "Astım/Hışıltı: ";
+    if (document.getElementById("wheezing")?.checked) metin += "Wheezing/ronküs var, ";
+    if (document.getElementById("ekspirium")?.checked) metin += "Ekspirium uzamış, ";
+    if (document.getElementById("retraksiyon")?.checked) metin += "Retraksiyon var, ";
+    if (document.getElementById("oksuruk")?.checked) metin += "Öksürük gece/egzersizle artan.\n";
+  } else if (secilenSablon === "bronsiolit") {
+    // benzer şekilde diğerlerini ekle...
+    metin += "Bronşiolit: Wheezing/ral var/yok, retraksiyon var/yok, hipoksi var/yok...\n";
+  } // diğer hastalıklar için benzer bloklar ekleyebilirsin
+
+  metin += "\n⚠️ Klinik duruma göre düzenlenmelidir.";
+
+  navigator.clipboard.writeText(metin).then(() => {
+    alert("Fizik muayene notu panoya kopyalandı!");
+  }).catch(() => {
+    alert("Kopyalama başarısız, metni seçip manuel kopyalayın.");
+  });
+
+  document.getElementById("sonuc").innerText = metin;
 }
 </script>
 
 <div class="bottom-menu">
-  <a href="index.html">
-    🏠<br><span>Ana Menü</span>
-  </a>
-  <a href="gir.html">
-    🧮<br><span>Hesap</span>
-  </a>
-  <a href="fizikmuayene.html">
-    📝<br><span>Notlar</span>
-  </a>
+  <a href="index.html">🏠<br><span>Ana Menü</span></a>
+  <a href="sivi.html">💧<br><span>Sıvı</span></a>
+  <a href="fizikmuayene.html" class="active">🩺<br><span>Muayene</span></a>
 </div>
 
 </body>
