@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>MARPED – Aşı Takip Şablonu</title>
+  <title>MARPED – Aşı Takip & Eksik Aşı Şablonu (2025)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding-bottom: 100px; line-height: 1.6; }
@@ -14,7 +14,8 @@
     button:hover { background: #5a369e; }
     .result { margin-top: 25px; padding: 20px; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; white-space: pre-wrap; font-size: 14px; line-height: 1.7; }
     .done { color: #198754; text-decoration: line-through; }
-    .upcoming { color: #dc3545; font-weight: bold; }
+    .missing { color: #dc3545; font-weight: bold; }
+    .catchup { color: #fd7e14; font-style: italic; }
     .bottom-menu { position: fixed; bottom: 0; left: 0; width: 100%; background: #6f42c1; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; }
     .bottom-menu a { color: white; text-decoration: none; font-size: 14px; text-align: center; flex: 1; }
     .bottom-menu span { font-size: 12px; display: block; }
@@ -24,8 +25,8 @@
 <body>
 
 <header>
-  <h2>Aşı Takip Şablonu (2025)</h2>
-  <p>Doğum tarihini gir → yapılan aşıları işaretle → eksik/yaklaşanları gör</p>
+  <h2>Aşı Takip & Eksik Aşı Şablonu (2025)</h2>
+  <p>Doğum tarihini gir → yapılan aşıları işaretle → eksik aşılar + catch-up önerisi gör</p>
 </header>
 
 <div class="container">
@@ -34,7 +35,6 @@
     <input type="date" id="dogumTarihi">
 
     <h3 style="margin-top:20px;">Yapılan Aşıları İşaretleyin</h3>
-
     <div id="asiListesi"></div>
 
     <button onclick="asiTakipHesapla()" style="margin-top:20px;">Hesapla & Şablon Oluştur</button>
@@ -46,33 +46,34 @@
 </div>
 
 <script>
+// 2025 Rutin + Sosyal Pediatri Catch-up Önerilerine göre aşı listesi
 const asiTakvimi = [
-  { id: "hepb1", ad: "Hepatit B (1. doz)", zaman: "doğum", ay: 0 },
-  { id: "bcg", ad: "BCG (Verem)", zaman: "2. ay", ay: 2 },
-  { id: "karma1", ad: "6'li Karma (1. doz)", zaman: "2. ay", ay: 2 },
-  { id: "kpa1", ad: "Pnömokok (KPA - 1. doz)", zaman: "2. ay", ay: 2 },
-  { id: "karma2", ad: "6'li Karma (2. doz)", zaman: "4. ay", ay: 4 },
-  { id: "kpa2", ad: "Pnömokok (2. doz)", zaman: "4. ay", ay: 4 },
-  { id: "karma3", ad: "6'li Karma (3. doz)", zaman: "6. ay", ay: 6 },
-  { id: "kpa3", ad: "Pnömokok (3. doz)", zaman: "6. ay", ay: 6 },
-  { id: "opa1", ad: "OPA (Çocuk felci - 1. doz)", zaman: "6. ay", ay: 6 },
-  { id: "kkk1", ad: "KKK (1. doz)", zaman: "12. ay", ay: 12 },
-  { id: "sucicegi1", ad: "Suçiçeği (1. doz)", zaman: "12. ay", ay: 12 },
-  { id: "kpa_rapel", ad: "Pnömokok (rapel)", zaman: "12. ay", ay: 12 },
-  { id: "karma_rapel", ad: "6'li Karma (rapel)", zaman: "18. ay", ay: 18 },
-  { id: "opa2", ad: "OPA (2. doz)", zaman: "18. ay", ay: 18 },
-  { id: "hepa1", ad: "Hepatit A (1. doz)", zaman: "18. ay", ay: 18 },
-  { id: "hepa2", ad: "Hepatit A (2. doz)", zaman: "24. ay", ay: 24 },
-  { id: "kkk2", ad: "KKK (2. doz)", zaman: "48. ay (4 yaş)", ay: 48 },
-  { id: "dabt_ipa", ad: "DaBT-İPA (rapel)", zaman: "48. ay", ay: 48 },
-  { id: "sucicegi2", ad: "Suçiçeği (2. doz)", zaman: "48. ay", ay: 48 },
-  { id: "td", ad: "Td (Tetanoz-Difteri rapel)", zaman: "13 yaş", ay: 156 }
+  { id: "hepb1", ad: "Hepatit B (1. doz)", zaman: "Doğumda", ay: 0 },
+  { id: "bcg", ad: "BCG (Verem)", zaman: "2 ay", ay: 2 },
+  { id: "karma1", ad: "6'li Karma (1. doz)", zaman: "2 ay", ay: 2 },
+  { id: "kpa1", ad: "Pnömokok (KPA 1. doz)", zaman: "2 ay", ay: 2 },
+  { id: "karma2", ad: "6'li Karma (2. doz)", zaman: "4 ay", ay: 4 },
+  { id: "kpa2", ad: "Pnömokok (2. doz)", zaman: "4 ay", ay: 4 },
+  { id: "karma3", ad: "6'li Karma (3. doz)", zaman: "6 ay", ay: 6 },
+  { id: "kpa3", ad: "Pnömokok (3. doz)", zaman: "6 ay", ay: 6 },
+  { id: "opa1", ad: "OPA (1. doz)", zaman: "6 ay", ay: 6 },
+  { id: "kkk1", ad: "KKK (1. doz)", zaman: "12 ay", ay: 12 },
+  { id: "sucicegi1", ad: "Suçiçeği (1. doz)", zaman: "12 ay", ay: 12 },
+  { id: "kpa_rapel", ad: "Pnömokok (rapel)", zaman: "12 ay", ay: 12 },
+  { id: "karma_rapel", ad: "6'li Karma (rapel)", zaman: "18 ay", ay: 18 },
+  { id: "opa2", ad: "OPA (2. doz)", zaman: "18 ay", ay: 18 },
+  { id: "hepa1", ad: "Hepatit A (1. doz)", zaman: "18 ay", ay: 18 },
+  { id: "hepa2", ad: "Hepatit A (2. doz)", zaman: "24 ay", ay: 24 },
+  { id: "kkk2", ad: "KKK (2. doz)", zaman: "48 ay (4 yaş)", ay: 48 },
+  { id: "dabt_ipa", ad: "DaBT-İPA (rapel)", zaman: "48 ay", ay: 48 },
+  { id: "sucicegi2", ad: "Suçiçeği (2. doz)", zaman: "48 ay", ay: 48 },
+  { id: "td", ad: "Td (rapel)", zaman: "13 yaş", ay: 156 }
 ];
 
 function asiTakipHesapla() {
   const dogumTarihi = document.getElementById("dogumTarihi").value;
   if (!dogumTarihi) {
-    document.getElementById("sonuc").innerHTML = '<div style="color:#dc3545;">Lütfen doğum tarihini girin.</div>';
+    document.getElementById("sonuc").innerHTML = '<div style="color:#dc3545;">Doğum tarihini girin.</div>';
     return;
   }
 
@@ -84,22 +85,25 @@ function asiTakipHesapla() {
   let yapilan = [];
   document.querySelectorAll('input[name="asi"]:checked').forEach(el => yapilan.push(el.value));
 
-  let metin = `AŞI TAKİP NOTU (${yasAy} aylık bebek)\nDoğum: ${dogum.toLocaleDateString('tr-TR')}\n\n`;
+  let metin = `AŞI TAKİP & EKSİK AŞI NOTU (${yasAy} aylık bebek)\nDoğum: ${dogum.toLocaleDateString('tr-TR')}\n\n`;
 
   asiTakvimi.forEach(asi => {
     const gecikme = yasAy - asi.ay;
     let durum = "";
     if (yapilan.includes(asi.id)) {
-      durum = `<span class="done">${asi.ad} – YAPILDI</span>`;
+      durum = `<span class="done">${asi.ad} – YAPILDI (${asi.zaman})</span>`;
     } else if (gecikme >= 0) {
-      durum = `<span class="upcoming">${asi.ad} – EKSİK / GEÇ KALINDI (${asi.zaman})</span>`;
+      durum = `<span class="missing">${asi.ad} – EKSİK / GEÇ KALINDI (${asi.zaman})</span>`;
+      // Catch-up önerisi ekle (Sosyal Pediatri au5.pdf bazlı basit)
+      if (yasAy >= 12 && asi.id.includes("kpa")) durum += " → 12-23 ay arası 2 doz, 24-59 ay tek doz önerilir.";
+      if (yasAy >= 18 && asi.id.includes("hepa")) durum += " → Hep-A 18 aydan itibaren, 6 ay aralıkla 2 doz.";
     } else {
       durum = `${asi.ad} – Yaklaşan (${asi.zaman})`;
     }
     metin += `${durum}\n`;
   });
 
-  metin += `\nNot: Eksik aşılar en kısa sürede tamamlanmalı. e-Nabız üzerinden takip edebilirsiniz.`;
+  metin += `\nCatch-up Önerisi (Sosyal Pediatri 2025): Eksik dozlar minimum aralıklarla tamamlanır. Tekrar doz gerekmez. 6'li karma aşı öncelikli, Hib içermeyen form yaşa göre değişir. e-Nabız'dan takip edin.`;
 
   document.getElementById("sonuc").innerHTML = metin;
 }
@@ -117,7 +121,7 @@ function metniKopyala() {
   });
 }
 
-// Sayfa yüklendiğinde aşı listesini oluştur
+// Sayfa yüklendiğinde aşı checkbox listesini oluştur
 document.addEventListener("DOMContentLoaded", () => {
   let listeHtml = '<h3 style="margin-top:20px;">Yapılan Aşıları İşaretleyin</h3>';
   asiTakvimi.forEach(asi => {
