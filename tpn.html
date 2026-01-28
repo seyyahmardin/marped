@@ -60,7 +60,7 @@
 
     <label>Toplam sıvı hedefi</label>
     <select id="siviHedef">
-      <!-- JavaScript ile dinamik doldurulacak -->
+      <!-- Dinamik doldurulacak -->
     </select>
 
     <label>Hedef enerji (kcal/kg/gün)</label>
@@ -75,7 +75,7 @@
     <label>Hedef GIR (mg/kg/dk)</label>
     <input type="number" id="hedefGir" step="0.1" value="8" min="4" max="14">
 
-    <!-- Elektrolitler -->
+    <!-- Elektrolitler (Fosfat kaldırıldı) -->
     <div class="electrolyte-group">
       <h4>Elektrolit / Vitamin (kg başına günlük hedef)</h4>
       <label>Sodyum (Na) mmol/kg/gün</label>
@@ -83,9 +83,6 @@
 
       <label>Potasyum (K) mmol/kg/gün</label>
       <input type="number" id="k" step="0.1" value="2" min="0">
-
-      <label>Fosfat (P) mmol/kg/gün</label>
-      <input type="number" id="p" step="0.1" value="0.5" min="0">
 
       <label>Kalsiyum (Ca) mmol/kg/gün</label>
       <input type="number" id="ca" step="0.1" value="1" min="0">
@@ -130,54 +127,41 @@ function otomatikDoldur() {
   const grup = document.getElementById("grup").value;
   if (grup === "yenidogan") {
     document.getElementById("siviBirim").value = "kg";
-    document.getElementById("siviHedef").innerHTML = `
-      <option value="80">80 mL/kg</option>
-      <option value="100" selected>80-100 mL/kg</option>
-      <option value="120">100-120 mL/kg</option>
-    `;
     document.getElementById("enerji").value = 80;
     document.getElementById("protein").value = 3.0;
     document.getElementById("lipidHedef").value = 1.5;
     document.getElementById("hedefGir").value = 6;
     document.getElementById("na").value = 1;
     document.getElementById("k").value = 1;
-    document.getElementById("p").value = 0.5;
     document.getElementById("ca").value = 0.8;
     document.getElementById("mg").value = 0.1;
   } else {
     document.getElementById("siviBirim").value = "kg";
-    document.getElementById("siviHedef").innerHTML = `
-      <option value="80">80-100 mL/kg</option>
-      <option value="120" selected>100-120 mL/kg</option>
-      <option value="140">120-140 mL/kg</option>
-      <option value="160">140-160 mL/kg</option>
-      <option value="180">>160 mL/kg</option>
-    `;
     document.getElementById("enerji").value = 80;
     document.getElementById("protein").value = 2.5;
     document.getElementById("lipidHedef").value = 2;
     document.getElementById("hedefGir").value = 8;
     document.getElementById("na").value = 2;
     document.getElementById("k").value = 2;
-    document.getElementById("p").value = 0.7;
     document.getElementById("ca").value = 1;
     document.getElementById("mg").value = 0.3;
   }
   siviHedefGuncelle();
 }
 
-// Sıvı birimi değişince hedef seçeneklerini güncelle
+// Sıvı birimi değişince hedef seçeneklerini güncelle (ayrılmış)
 function siviHedefGuncelle() {
   const birim = document.getElementById("siviBirim").value;
   const hedefSelect = document.getElementById("siviHedef");
 
   if (birim === "kg") {
     hedefSelect.innerHTML = `
-      <option value="80">80-100 mL/kg</option>
-      <option value="120" selected>100-120 mL/kg</option>
-      <option value="140">120-140 mL/kg</option>
-      <option value="160">140-160 mL/kg</option>
-      <option value="180">>160 mL/kg</option>
+      <option value="80">80 mL/kg</option>
+      <option value="100">100 mL/kg</option>
+      <option value="120" selected>120 mL/kg</option>
+      <option value="140">140 mL/kg</option>
+      <option value="160">160 mL/kg</option>
+      <option value="180">180 mL/kg</option>
     `;
   } else {
     hedefSelect.innerHTML = `
@@ -208,7 +192,7 @@ function hesaplaTPN() {
 
   const boy = parseFloat(document.getElementById("boy").value) || 0;
   const siviBirim = document.getElementById("siviBirim").value;
-  const siviHedefDeger = parseFloat(document.getElementById("siviHedef").value) || 1200;
+  const siviHedefDeger = parseFloat(document.getElementById("siviHedef").value) || 120;
 
   const vya = vyaHesapla(kg, boy);
   let toplamHacim = siviBirim === "m2" ? vya * siviHedefDeger : kg * siviHedefDeger;
@@ -220,7 +204,6 @@ function hesaplaTPN() {
 
   const na = parseFloat(document.getElementById("na").value) || 0;
   const k = parseFloat(document.getElementById("k").value) || 0;
-  const p = parseFloat(document.getElementById("p").value) || 0;
   const ca = parseFloat(document.getElementById("ca").value) || 0;
   const mg = parseFloat(document.getElementById("mg").value) || 0;
   const cernevit = parseFloat(document.getElementById("cernevit").value) || 0;
@@ -239,16 +222,15 @@ function hesaplaTPN() {
   const lipidHacim = lipidG * 5; // %20 lipid
   const aaHacim = proteinG * 10; // %10 AA
 
-  // Elektrolit hacimleri yaklaşık
+  // Elektrolit hacimleri yaklaşık (fosfat kaldırıldı)
   const naHacim = na * kg * 0.4;
   const kHacim = k * kg * 0.1;
-  const pHacim = p * kg * 0.3;
   const caHacim = ca * kg * 0.47;
   const mgHacim = mg * kg * 0.04;
 
   const vitaminHacim = cernevit + tracutil;
 
-  const toplamAyrilan = lipidHacim + aaHacim + naHacim + kHacim + pHacim + caHacim + mgHacim + vitaminHacim;
+  const toplamAyrilan = lipidHacim + aaHacim + naHacim + kHacim + caHacim + mgHacim + vitaminHacim;
   const dekstrozHacim = toplamHacim - toplamAyrilan;
 
   // Glukoz karışımı
@@ -263,7 +245,7 @@ function hesaplaTPN() {
 
   let best = combos.length > 0 ? combos.reduce((a,b) => a.maxDex < b.maxDex ? a : b) : null;
 
-  // Sonuç HTML
+  // Sonuç HTML (fosfat satırı kaldırıldı)
   let html = `
     <table>
       <tr><td>VYA</td><td>${vya.toFixed(3)} m²</td></tr>
