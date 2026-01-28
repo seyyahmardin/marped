@@ -1,136 +1,229 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>Vaka Danışma | MAR PED</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaka Danışma | MAR PED</title>
+  <style>
+    :root {
+      --primary: #4a90e2;
+      --primary-dark: #357abd;
+      --bg: #f8fbff;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --gray: #7f8c8d;
+      --warning: #e67e22;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    header h1 { margin: 0; font-size: 2.2rem; }
+    header p { margin: 8px 0 0; opacity: 0.9; }
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f2f8ff;
-  margin: 0;
-}
-<!-- ANA MENÜYE DÖN -->
-<div style="
-  background:#4facfe;
-  padding:12px 15px;
-  text-align:left;
-">
-  <a href="index.html" style="
-    color:white;
-    text-decoration:none;
-    font-weight:bold;
-    font-size:16px;
-  ">
-    ⬅️ Ana Menü
-  </a>
-</div>
+    .back-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.25);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: bold;
+      backdrop-filter: blur(4px);
+      transition: all 0.3s;
+    }
+    .back-btn:hover {
+      background: rgba(255,255,255,0.4);
+      transform: translateX(-5px);
+    }
 
-  .container {
-  max-width: 700px;
-  background: #fff;
-  margin: 30px auto;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-}
-h1 { text-align: center; color: #0077cc; }
-label { display:block; margin-top:15px; font-weight:bold; }
-input, textarea {
-  width:100%; padding:10px; margin-top:5px;
-}
-textarea { resize:vertical; }
-.section {
-  margin-top:25px;
-  padding-top:15px;
-  border-top:2px dashed #cce4ff;
-}
-button {
-  margin-top:20px;
-  width:100%;
-  padding:12px;
-  background:#4facfe;
-  color:white;
-  border:none;
-  border-radius:25px;
-  font-size:16px;
-}
-.warning {
-  margin-top:20px;
-  background:#fff3cd;
-  padding:12px;
-  border-left:5px solid #ff9800;
-  border-radius:10px;
-  font-size:13px;
-}
-</style>
+    .container {
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 15px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    h2 { color: var(--primary); margin-bottom: 1.5rem; text-align: center; }
+    label { display: block; margin: 1rem 0 0.4rem; font-weight: 600; color: #34495e; }
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d9e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border 0.3s;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(74,144,226,0.2);
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    .section { margin: 2rem 0; padding: 1.5rem; background: #f9fcff; border-radius: 12px; border: 1px solid #e3f0ff; }
+    .section h3 { margin: 0 0 1rem; color: var(--primary); font-size: 1.2rem; }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      margin: 1rem 0;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    .checkbox-label input { width: auto; margin-right: 12px; transform: scale(1.3); }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: all 0.3s;
+    }
+    button:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(74,144,226,0.3); }
+
+    .warning {
+      background: #fff8e1;
+      border-left: 5px solid var(--warning);
+      padding: 1rem;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .success-message {
+      display: none;
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      padding: 2rem;
+      text-align: center;
+      border-radius: 12px;
+      margin-top: 2rem;
+    }
+    .success-message h3 { color: #2e7d32; margin: 0 0 1rem; }
+
+    .bottom-footer {
+      text-align: center;
+      margin: 3rem 0 1rem;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
-
 <body>
+
+<a href="index.html" class="back-btn">⬅️ Ana Menü</a>
+
+<header>
+  <h1>Anonim Vaka Danışma</h1>
+  <p>Pediatrik vakalarınızı uzman görüşü için paylaşın (tamamen anonim)</p>
+</header>
+
 <div class="container">
+  <div class="card">
 
-<h1>Anonim Vaka Danışma</h1>
+    <form action="https://formsubmit.co/seyyahmd07@gmail.com" method="POST" id="vakaForm">
 
-<form action="https://formsubmit.co/seyyahmd07@gmail.com" method="POST">
+      <!-- Gizli ayarlar -->
+      <input type="hidden" name="_subject" value="MAR PED | Yeni Vaka Danışma">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" value="">
 
-<!-- GİZLİ AYARLAR -->
-<input type="hidden" name="_subject" value="MAR PED | Yeni Vaka Danışma">
-<input type="hidden" name="_captcha" value="false">
-<input type="hidden" name="_template" value="table">
+      <label for="yas">Hasta Yaşı (örn: 3 yaş 6 ay)</label>
+      <input type="text" id="yas" name="Hasta Yaşı" placeholder="Örn: 4 yaş" required>
 
-<label>Hasta Yaşı</label>
-<input type="text" name="Hasta Yaşı" required>
+      <label for="kilo">Kilo (kg)</label>
+      <input type="number" id="kilo" name="Kilo" step="0.1" min="0.5" placeholder="Örn: 15.5" required>
 
-<label>Kilo (kg)</label>
-<input type="number" name="Kilo" required>
+      <label for="ozet">Klinik Özet (ana şikayet, öykü, bulgular)</label>
+      <textarea id="ozet" name="Klinik Özet" rows="5" placeholder="Ana şikayet, süre, eşlik eden bulgular, tetkikler..." required></textarea>
 
-<label>Klinik Özet</label>
-<textarea name="Klinik Özet" rows="4" required></textarea>
+      <div class="section">
+        <h3>Kan Gazı (PAAG)</h3>
+        <label for="ph">pH</label>
+        <input type="number" id="ph" name="pH" step="0.01" placeholder="Örn: 7.38">
 
-<div class="section">
-<strong>Kan Gazı (PAAG)</strong>
+        <label for="pco2">pCO₂ (mmHg)</label>
+        <input type="number" id="pco2" name="pCO2" placeholder="Örn: 38">
 
-<label>pH</label>
-<input type="number" step="0.01" name="pH">
+        <label for="hco3">HCO₃ (mmol/L)</label>
+        <input type="number" id="hco3" name="HCO3" step="0.1" placeholder="Örn: 22.5">
 
-<label>pCO₂</label>
-<input type="number" name="pCO2">
+        <label for="be">BE (Base Excess)</label>
+        <input type="number" id="be" name="BE" step="0.1" placeholder="Örn: -2.1">
+      </div>
 
-<label>HCO₃</label>
-<input type="number" name="HCO3">
+      <div class="section">
+        <h3>Önemli Tetkikler</h3>
+        <label for="na">Na (mmol/L)</label>
+        <input type="number" id="na" name="Na" step="0.1" placeholder="Örn: 138">
 
-<label>BE</label>
-<input type="number" name="BE">
+        <label for="k">K (mmol/L)</label>
+        <input type="number" id="k" name="K" step="0.1" placeholder="Örn: 4.2">
+
+        <label for="glukoz">Glukoz (mg/dL)</label>
+        <input type="number" id="glukoz" name="Glukoz" placeholder="Örn: 95">
+
+        <label for="kreatinin">Kreatinin (mg/dL)</label>
+        <input type="number" id="kreatinin" name="Kreatinin" step="0.01" placeholder="Örn: 0.45">
+      </div>
+
+      <div class="warning">
+        <label class="checkbox-label">
+          <input type="checkbox" name="onay" required>
+          Bu formda <strong>kişisel sağlık verisi (isim, TC, hastane no vb.) bulunmamaktadır</strong>. Paylaşım tamamen anonim ve eğitim amaçlıdır. Onaylıyorum.
+        </label>
+      </div>
+
+      <button type="submit">Danışma Talebi Gönder</button>
+    </form>
+
+    <div class="success-message" id="successMsg">
+      <h3>Teşekkürler!</h3>
+      <p>Vaka danışma talebiniz başarıyla gönderildi.<br>En kısa sürede değerlendirilip dönüş yapılacaktır.</p>
+    </div>
+
+  </div>
+
+  <div class="bottom-footer">
+    MAR PED © 2025 | Mardin Eğitim ve Araştırma Hastanesi Pediatri Kliniği<br>
+    Dr. Ferhat Kalkan
+  </div>
 </div>
 
-<div class="section">
-<strong>Tetkikler</strong>
+<script>
+// Form başarı mesajı gösterimi (FormSubmit callback)
+window.addEventListener("load", function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("success") === "true") {
+    document.getElementById("successMsg").style.display = "block";
+    document.querySelector("form").style.display = "none";
+  }
+});
+</script>
 
-<label>Na</label>
-<input type="number" name="Na">
-
-<label>K</label>
-<input type="number" name="K">
-
-<label>Glukoz</label>
-<input type="number" name="Glukoz">
-
-<label>Kreatinin</label>
-<input type="number" name="Kreatinin">
-</div>
-
-<div class="warning">
-<input type="checkbox" required>
-<strong>Onay:</strong>  
-Bu formda <u>kişisel sağlık verisi</u> bulunmamaktadır.  
-Paylaşım tamamen anonim ve eğitim amaçlıdır.
-</div>
-
-<button type="submit">Danışma Talebi Gönder</button>
-
-</form>
-
-</div>
 </body>
 </html>
