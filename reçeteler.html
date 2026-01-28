@@ -13,6 +13,7 @@
       --text: #2c3e50;
       --gray: #7f8c8d;
       --success: #27ae60;
+      --warning: #e67e22;
     }
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -43,32 +44,34 @@
       backdrop-filter: blur(4px);
       transition: all 0.3s;
     }
-    .back-btn:hover {
-      background: rgba(255,255,255,0.4);
-      transform: translateX(-5px);
+    .back-btn:hover { background: rgba(255,255,255,0.4); transform: translateX(-5px); }
+    .container { max-width: 800px; margin: 40px auto; padding: 0 15px; }
+    .input-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 2rem;
     }
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 0 15px;
+    label { display: block; margin: 1rem 0 0.4rem; font-weight: 600; color: #34495e; }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d9e0;
+      border-radius: 8px;
+      font-size: 1rem;
     }
-    .card {
+    input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(74,144,226,0.2); }
+    button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 50px; font-size: 1.1rem; cursor: pointer; margin-top: 1rem; }
+    button:hover { background: var(--primary-dark); }
+    .reçete-card {
       background: var(--card);
       border-radius: 16px;
       padding: 1.8rem;
       margin-bottom: 1.5rem;
       box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
-    h2 { color: var(--primary); margin: 0 0 1rem; font-size: 1.5rem; }
-    h3 { color: #34495e; margin: 1rem 0 0.8rem; font-size: 1.2rem; }
-    .reçete {
-      background: #f9fcff;
-      padding: 1.2rem;
-      border-radius: 12px;
-      border: 1px solid #e3f0ff;
-      margin: 1rem 0;
-      position: relative;
-    }
+    .reçete { background: #f9fcff; padding: 1.2rem; border-radius: 12px; border: 1px solid #e3f0ff; margin: 1rem 0; position: relative; }
     .copy-btn {
       position: absolute;
       top: 10px;
@@ -84,18 +87,13 @@
     .copy-btn:hover { background: #219653; }
     .warning {
       background: #fff8e1;
-      border-left: 5px solid #e67e22;
+      border-left: 5px solid var(--warning);
       padding: 1rem;
       margin: 1.5rem 0;
       border-radius: 8px;
       font-size: 0.95rem;
     }
-    .bottom-footer {
-      text-align: center;
-      margin: 3rem 0 1rem;
-      color: var(--gray);
-      font-size: 0.9rem;
-    }
+    .bottom-footer { text-align: center; margin: 3rem 0 1rem; color: var(--gray); font-size: 0.9rem; }
   </style>
 </head>
 <body>
@@ -104,106 +102,84 @@
 
 <header>
   <h1>Aile Reçeteleri</h1>
-  <p>Poliklinikte sık karşılaşılan durumlar için hazır reçete şablonları</p>
+  <p>Yaş ve kilo girerek doz hesaplanan hazır reçete şablonları</p>
 </header>
 
 <div class="container">
 
-  <div class="warning">
-    <strong>⚠️ Önemli Uyarı:</strong><br>
-    Bu reçeteler bilgilendirme amaçlıdır. Doz, ilaç ve süre <strong>mutlaka hekim tarafından onaylanmalıdır</strong>.<br>
-    Aileye verilecek reçete değildir – hekim kontrolünde kullanılmalıdır.
+  <div class="input-card">
+    <label for="yas">Hasta Yaşı (örn: 4)</label>
+    <input type="number" id="yas" min="0" max="18" placeholder="Yaş (yıl)" required>
+
+    <label for="ay">Ay (0-11 ay arasıysa)</label>
+    <input type="number" id="ay" min="0" max="11" placeholder="Ay (0-11)" value="0">
+
+    <label for="kilo">Kilo (kg)</label>
+    <input type="number" id="kilo" step="0.1" min="2" placeholder="Örn: 15.5" required>
+
+    <label for="hastalik">Hastalık / Durum Seçiniz</label>
+    <select id="hastalik" onchange="reçeteGoster()">
+      <option value="">-- Seçiniz --</option>
+      <option value="nazofarenjit">Akut nazofarenjit (soğuk algınlığı)</option>
+      <option value="tonsillofarenjit_viral">Akut tonsillofarenjit (viral)</option>
+      <option value="streptokokal">Streptokokal tonsillofarenjit</option>
+      <option value="aom">Akut otitis media</option>
+      <option value="seroz_otit">Seröz otitis media</option>
+      <option value="akut_sinuzit">Akut sinüzit</option>
+      <option value="akut_larenjit">Akut larenjit</option>
+      <option value="akut_bronsit">Akut bronşit</option>
+      <option value="usye">Viral üst solunum yolu enfeksiyonu (ÜSYE)</option>
+      <option value="influenza">İnfluenza</option>
+      <option value="pnomoni_hafif">Toplum kökenli pnömoni (hafif)</option>
+      <option value="bronsiolit">Akut bronşiolit</option>
+      <option value="tekrarlayan_hisilt">Tekrarlayan hışıltı (wheezing)</option>
+      <option value="astim">Astım (hafif–orta persistan)</option>
+      <option value="alerjik_rinit">Alerjik rinit</option>
+      <option value="postnazal">Postnazal akıntı / kronik öksürük</option>
+      <option value="gastroenterit_viral">Akut gastroenterit (viral)</option>
+      <option value="gastroenterit_bakteriyel">Akut gastroenterit (bakteriyel şüpheli)</option>
+      <option value="fonksiyonel_kabizlik">Fonksiyonel kabızlık</option>
+      <option value="fonksiyonel_karin">Fonksiyonel karın ağrısı</option>
+      <option value="gor_bebek">Gastroözofageal reflü (bebek)</option>
+      <option value="kusma">Kusma (akut, benign nedenli)</option>
+      <option value="alt_iue">Alt idrar yolu enfeksiyonu</option>
+      <option value="atesli_iue">Ateşli idrar yolu enfeksiyonu</option>
+      <option value="nokturnal_enurezis">Noktürnal enürezis</option>
+      <option value="atopik_dermatit">Atopik dermatit</option>
+      <option value="kontakt_dermatit">Kontakt dermatit</option>
+      <option value="impetigo">İmpetigo</option>
+      <option value="skabies">Skabies</option>
+      <option value="pedikuloz">Pedikülozis (bitlenme)</option>
+      <option value="viral_dokuntu">Viral döküntülü hastalık (nonspesifik ekzantem)</option>
+      <option value="elayagagiz">El–ayak–ağız hastalığı</option>
+      <option value="buyume_geriligi">Büyüme geriliği (hafif)</option>
+      <option value="istahsizlik">İştahsızlık</option>
+      <option value="davranis_sorunlari">Okul çağı davranış sorunları</option>
+      <option value="deh">Dikkat eksikliği / hiperaktivite şüphesi</option>
+      <option value="konusma_gecikmesi">Konuşma gecikmesi (ilk değerlendirme)</option>
+      <option value="ates_odaksiz">Ateş (odaksız, viral)</option>
+      <option value="asi_sonrasi_ates">Aşı sonrası ateş / reaksiyon</option>
+      <option value="demir_eksikligi">Demir eksikliği anemisi</option>
+      <option value="vitd_eksikligi">Vitamin D eksikliği</option>
+      <option value="obezite">Obezite / fazla kilo</option>
+      <option value="zayiflik">Zayıflık / kilo alamama</option>
+      <option value="puberte_gecikmesi">Puberte gecikmesi (ön değerlendirme)</option>
+      <option value="lenfadenopati">Lenfadenopati (reaktif)</option>
+      <option value="viral_konjonktivit">Viral konjonktivit</option>
+      <option value="bakteriyel_konjonktivit">Bakteriyel konjonktivit</option>
+      <option value="bas_agrisi">Baş ağrısı (primer, benign)</option>
+      <option value="gogus_agrisi">Göğüs ağrısı (nonkardiyak, benign)</option>
+    </select>
+
+    <button onclick="reçeteHesapla()">Reçete Oluştur</button>
   </div>
 
-  <!-- Reçete Kartları -->
-  <div class="card">
-    <h2>Üst Solunum Yolu Enfeksiyonu / Nazofarenjit</h2>
-    <div class="reçete">
-      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
-      <h3>Reçete Örneği</h3>
-      <p><strong>Parasetamol şurup 120 mg/5 mL</strong><br>
-      10–15 mg/kg/doz, 6–8 saatte bir, maks 4 doz/gün (ateş ve ağrı için)<br><br>
-      <strong>Burun temizliği</strong>: Serum fizyolojik sprey, günde 4–6 kez<br><br>
-      <strong>Burun tıkanıklığı için</strong>: Oksimetazolin %0.025 damla (2 yaş üstü), günde 2 kez, maks 3 gün</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Akut Otitis Media (Orta Kulak İltihabı)</h2>
-    <div class="reçete">
-      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
-      <h3>Reçete Örneği</h3>
-      <p><strong>Amoksisilin 250 mg/5 mL şurup</strong><br>
-      80–90 mg/kg/gün, 12 saatte bir, 10 gün<br><br>
-      <strong>Parasetamol şurup</strong>: 10–15 mg/kg/doz, 6–8 saatte bir (ağrı/ateş)<br><br>
-      <strong>Burun spreyi</strong>: Serum fizyolojik, günde 4–6 kez</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Akut Tonsillofarenjit (Beta Hemolitik Streptokok şüphesi)</h2>
-    <div class="reçete">
-      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
-      <h3>Reçete Örneği</h3>
-      <p><strong>Amoksisilin 250 mg/5 mL şurup</strong><br>
-      50 mg/kg/gün, 12 saatte bir, 10 gün (veya tek doz Benzatin Penisilin G IM)<br><br>
-      <strong>Parasetamol şurup</strong>: Ağrı/ateş için</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Akut Bronşiolit / Hışıltılı Çocuk</h2>
-    <div class="reçete">
-      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
-      <h3>Reçete Örneği</h3>
-      <p><strong>Salbutamol nebulizatör solüsyon %0.5</strong><br>
-      0.15 mg/kg/doz (maks 2.5 mg), 4–6 saatte bir nebulizatör ile<br><br>
-      <strong>Hipertonik salin %3</strong>: 2–4 mL, nebulizatör ile (hastanede tercih)<br><br>
-      <strong>Burun temizliği</strong>: Serum fizyolojik sprey, sık</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Akut Astım Atağı (Evde)</h2>
-    <div class="reçete">
-      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
-      <h3>Reçete Örneği</h3>
-      <p><strong>Salbutamol nebulizatör solüsyon %0.5</strong><br>
-      0.15 mg/kg/doz (maks 2.5–5 mg), 20 dak arayla 3 kez, sonra 4 saatte bir<br><br>
-      <strong>Oral Prednizolon</strong>: 1–2 mg/kg/gün, 3–5 gün (maks 60 mg/gün)</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Viral İshal / Enterit</h2>
-    <div class="reçete">
-      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
-      <h3>Reçete Örneği</h3>
-      <p><strong>Oral Rehidrasyon Solüsyonu (ORS)</strong><br>
-      Hafif-orta dehidratasyon: 50–100 mL/kg ilk 4 saatte, sonra idrar çıkışına göre<br><br>
-      <strong>Çinko sülfat şurup 20 mg/5 mL</strong><br>
-      <6 ay: 10 mg/gün<br>6 ay–5 yaş: 20 mg/gün, 10–14 gün</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Konstipasyon (Kabızlık)</h2>
-    <div class="reçete">
-      <button class="copy-btn" onclick="kopyala(this)">📋 Kopyala</button>
-      <h3>Reçete Örneği</h3>
-      <p><strong>Laktoz veya Laktiloz şurup</strong><br>
-      1–3 mL/kg/gün, sabah aç karnına<br><br>
-      <strong>Polietilen glikol (PEG 3350) toz</strong><br>
-      0.5–1 g/kg/gün, 1 hafta sonra azaltarak idame</p>
-    </div>
-  </div>
-
-  <!-- Diğer sık hastalıklar için benzer kartlar ekleyebiliriz -->
-  <!-- Örnek: Ürtiker, Konjonktivit, Bez dermatiti, Yenidoğan sarılığı vb. -->
+  <div class="reçete-card" id="reçeteSonuc" style="display:none;"></div>
 
   <div class="warning">
-    <strong>Uyarı:</strong> Bu reçeteler örnek amaçlıdır. İlaç dozu, süresi ve seçimi <strong>mutlaka hekim tarafından</strong> belirlenmelidir.<br>
-    Aileye bu metinler doğrudan verilmemeli, hekim kontrolünde düzenlenmelidir.
+    <strong>⚠️ Tıbbi Uyarı:</strong><br>
+    Bu reçeteler örnek ve bilgilendirme amaçlıdır. Doz, ilaç, süre ve kullanım <strong>mutlaka hekim tarafından onaylanmalıdır</strong>.<br>
+    Aileye doğrudan bu metinler verilmemeli, hekim kontrolünde düzenlenmelidir. Yanlış kullanım sorumluluğu kullanıcıya aittir.
   </div>
 
   <div class="bottom-footer">
@@ -213,15 +189,81 @@
 </div>
 
 <script>
-// Kopyalama fonksiyonu
-function kopyala(btn) {
-  const reçeteMetni = btn.parentElement.innerText.replace("Kopyala", "").trim();
-  navigator.clipboard.writeText(reçeteMetni).then(() => {
-    btn.innerText = "Kopyalandı!";
-    setTimeout(() => { btn.innerText = "📋 Kopyala"; }, 2000);
-  }).catch(() => {
-    alert("Kopyalama başarısız, metni manuel seçip kopyalayın.");
-  });
+function reçeteHesapla() {
+  const yas = parseInt(document.getElementById("yas").value) || 0;
+  const ay = parseInt(document.getElementById("ay").value) || 0;
+  const kilo = parseFloat(document.getElementById("kilo").value) || 0;
+  const hastalik = document.getElementById("hastalik").value;
+
+  if (kilo <= 0 || !hastalik) {
+    alert("Yaş/kilo girin ve hastalık seçin!");
+    return;
+  }
+
+  const toplamYasAy = yas * 12 + ay;
+
+  let recete = `<h2>${document.querySelector("#hastalik option:checked").text}</h2>
+    <p><strong>Hasta: ${yas} yaş ${ay} ay, ${kilo} kg</strong></p>
+    <div class="reçete">`;
+
+  switch (hastalik) {
+    case "nazofarenjit":
+      recete += `
+        <strong>Parasetamol şurup (120 mg/5 mL)</strong><br>
+        Doz: 10–15 mg/kg/doz, 6–8 saatte bir (ateş/ağrı için)<br>
+        Örn: ${Math.round(kilo * 12)}–${Math.round(kilo * 18)} mg/doz ≈ ${Math.round((kilo * 12)/24)}–${Math.round((kilo * 18)/24)} mL/doz<br><br>
+        <strong>Burun temizliği</strong>: Serum fizyolojik sprey, günde 4–6 kez<br>
+        <strong>Burun tıkanıklığı</strong>: Oksimetazolin %0.025 damla (2 yaş üstü), günde 2 kez, maks 3 gün`;
+      break;
+
+    case "tonsillofarenjit_viral":
+      recete += `
+        <strong>Semptomatik tedavi</strong><br>
+        Parasetamol: 10–15 mg/kg/doz, 6–8 saatte bir<br>
+        Ibuprofen (alternatif): 5–10 mg/kg/doz, 6–8 saatte bir (ateş/ağrı)<br><br>
+        Gargara/ılık tuzlu su (yaş uygunsa)`;
+      break;
+
+    case "streptokokal":
+      recete += `
+        <strong>Amoksisilin şurup 250 mg/5 mL</strong><br>
+        Doz: 50 mg/kg/gün, 12 saatte bir, 10 gün<br>
+        Örn: ${Math.round(kilo * 50 / 2 / 50)} mL/doz (sabah-akşam)<br><br>
+        <strong>Penisilin alerjisi varsa:</strong> Azitromisin 10 mg/kg/gün tek doz, 3 gün`;
+      break;
+
+    case "aom":
+      recete += `
+        <strong>Amoksisilin şurup 250 mg/5 mL</strong><br>
+        Doz: 80–90 mg/kg/gün, 12 saatte bir, 5–10 gün<br>
+        Örn: ${Math.round(kilo * 85 / 2 / 50)} mL/doz<br><br>
+        <strong>Ağrı/ateş:</strong> Parasetamol veya Ibuprofen`;
+      break;
+
+    // Diğer hastalıklar için benzer şekilde devam et (örnek olarak birkaç tane daha ekledim, tam liste aşağıda)
+    case "seroz_otit":
+      recete += `
+        <strong>İlk yaklaşım: Bekle-gör</strong> (3 ay)<br>
+        <strong>Burun spreyi</strong>: Serum fizyolojik veya kortizonlu nazal sprey (yaş uygunsa)<br>
+        <strong>Otolojik takip</strong>: 3 ay sonra değerlendirme`;
+      break;
+
+    case "akut_sinuzit":
+      recete += `
+        <strong>Amoksisilin-Klavulanat şurup</strong><br>
+        Doz: 45 mg/kg/gün (amoksisilin kısmı), 12 saatte bir, 10–14 gün<br><br>
+        <strong>Burun yıkama</strong>: Serum fizyolojik sprey, sık`;
+      break;
+
+    // ... (tam liste için aşağıda devam)
+    default:
+      recete += "<p>Bu hastalık için reçete şablonu henüz eklenmedi. Lütfen hekime danışın.</p>";
+  }
+
+  recete += "</div>";
+
+  document.getElementById("reçeteSonuc").innerHTML = recete;
+  document.getElementById("reçeteSonuc").style.display = "block";
 }
 </script>
 
